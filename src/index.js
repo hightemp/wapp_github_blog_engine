@@ -69,6 +69,8 @@ class App {
     static sCatalogCategoryID = ""
     static sArticleID = ""
 
+    static oDocuments = {}
+
     // NOTE: методоты для работы dom
 
     static get $oAllArticlesList() { return $(".all-articles-panel .list") }
@@ -111,6 +113,8 @@ class App {
 
     static get $oPageSaveBtn() { return $("#page-save-btn") }
 
+    static get $oPublishBtn() { return $("#app-publish-btn") }
+
     static get $oCatalogGroupsCreate() { return $("#catalog-groups-create") }
     static get $oCatalogGroupsEdit() { return $("#catalog-groups-edit") }
     static get $oCatalogGroupsRemove() { return $("#catalog-groups-remove") }
@@ -120,6 +124,8 @@ class App {
     static get $oCatalogArticleCreate() { return $("#catalog-article-create") }
     static get $oCatalogArticleEdit() { return $("#catalog-article-edit") }
     static get $oCatalogArticleRemove() { return $("#catalog-article-remove") }
+
+    
 
     // NOTE: 
 
@@ -217,6 +223,92 @@ class App {
         })
         App.$oModeTagsBtn.click(() => {
             App.fnChangeMode("tags")
+        })
+        // NOTE: Опубликовать в виде страниц
+        App.$oPublishBtn.click(() => {
+            App.fnGenerateIndexPage()
+        })
+    }
+
+    static fnRenderArticles(iCategoryID, iLevel=1)
+    {
+        var aR = App.fnFilterArticlesByCategory(iCategoryID)
+        var aMarkdown = []
+
+        for (var oArticle of aR) {
+            aMarkdown.push(` `.repeat(iLevel*2) + `* ` +oArticle.name)
+        }
+
+        return aMarkdown
+    }
+
+    static fnRenderCategoriesList(aR, iParentID=null, iLevel=1)
+    {
+        var aMarkdown = []
+
+        for (var oCategory of aR) {
+            if (!oCategory.parent_id) oCategory.parent_id = null
+            if (!iParentID) iParentID = null
+            if (oCategory.parent_id!=iParentID) continue
+            aMarkdown.push(` `.repeat(iLevel*2) + `- ` +oCategory.name)
+            aMarkdown = aMarkdown.concat(App.fnRenderCategoriesList(aR, oCategory.id, iLevel+1))
+            aMarkdown = aMarkdown.concat(App.fnRenderArticles(oCategory.id, iLevel+1))
+        }
+
+        return aMarkdown
+    }
+
+    static fnRenderCategories(iGroupID)
+    {
+        var aMarkdown = []
+
+        var aR = App.fnFilterCategoriesByGroup(iGroupID)
+        aMarkdown = App.fnRenderCategoriesList(aR, null, 1)
+
+        return aMarkdown
+    }
+
+    static fnRenderGroups()
+    {
+        var aMarkdown = []
+
+        for (var oGroup of App.oDatabase.groups) {
+            aMarkdown.push(`- ${oGroup.name}`)
+            aMarkdown = aMarkdown.concat(App.fnRenderCategories(oGroup.id))
+        }
+
+        return aMarkdown
+    }
+
+    static fnGenerateIndexPage()
+    {
+        var aMarkdown = [`# Оглавление\n`]
+
+        aMarkdown = aMarkdown.concat(App.fnRenderGroups())
+        var sMarkdown = aMarkdown.join(`\n`)
+
+        App.fnPublishDocument(`index.md`, sMarkdown)
+        // console.log()
+    }
+
+    static async fnPublishDocument(sPath, sContent)
+    {
+        if (!App.oDocuments[sPath]) {
+            await App.octokit.rest.repos.getContent({
+                owner: App.sLogin,
+                repo: App.sRepo,
+                path: sPath,
+            }).then(({ data }) => {
+                App.oDocuments[sPath] = data
+            }).catch((_) => { })
+        }
+        return App.octokit.rest.repos.createOrUpdateFileContents({
+            owner: App.sLogin,
+            repo: App.sRepo,
+            path: sPath,
+            sha: App.oDocuments[sPath].sha,
+            message: fnGetUpdateMessage(),
+            content: encode(sContent)
         })
     }
 

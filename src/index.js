@@ -38,6 +38,9 @@ class App {
             {"id":6, "name": "der bei der Kapitalklasse vorgenommen werden", "category_id": "3", "html": "sadf asfdasf asdf"},
         ]
     }
+
+    static SHA = ""
+
     // NOTE: Константы
     static DATABASE_PATH = "notes-database.json"
     static DATABASE_UPDATE_TIMEOUT = 30000
@@ -264,6 +267,19 @@ class App {
         
     }
 
+    static fnGetSHADatabase()
+    {
+        if (!App.SHA) {
+            App.octokit.rest.repos.getContent({
+                owner: App.sLogin,
+                repo: App.sRepo,
+                path: App.DATABASE_PATH,
+            }).then(({ data }) => {
+                App.SHA = data.sha
+            })
+        }
+    }
+
     static fnGetNotesDatabase()
     {
         console.log([App.sLogin, App.sRepo, App.DATABASE_PATH])
@@ -274,6 +290,7 @@ class App {
         }).then(({ data }) => {
             console.log('fnGetNotesDatabase', data)
             App.oDatabase = JSON.parse(decode(data.content))
+            App.SHA = data.sha
             console.log('fnGetNotesDatabase', App.oDatabase)
         })
     }
@@ -283,12 +300,14 @@ class App {
         App.fnUpdate()
         console.log('fnWriteNotesDatabase', App.oDatabase);
         App.bDirty = false
+        var sData = JSON.stringify(App.oDatabase)
         return App.octokit.rest.repos.createOrUpdateFileContents({
             owner: App.sLogin,
             repo: App.sRepo,
             path: App.DATABASE_PATH,
+            sha: App.SHA,
             message: fnGetUpdateMessage(),
-            content: encode(JSON.stringify(App.oDatabase))
+            content: encode(sData)
         })
     }
 
@@ -299,8 +318,9 @@ class App {
     {
         if (App.bDirty) {
             App.fnPrepareEditorContents()
-            App.fnWriteNotesDatabase();
+            App.fnWriteNotesDatabase()
         }
+        App.fnGetSHADatabase()
         setTimeout(App.fnUpdateNoteDatabase, App.DATABASE_UPDATE_TIMEOUT);
     }
 
@@ -581,7 +601,6 @@ class App {
         App.fnGetNotesDatabase()
             .then(() => {
                 App.fnChangeMode("catalog")
-                
                 App.fnUpdate();
                 App.fnUpdateNoteDatabase();
             })

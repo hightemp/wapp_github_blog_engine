@@ -2,4 +2,6 @@
 
 Движок для введения блога с использованием github api и github pages.
 
+https://hightemp.github.io/wapp_github_blog_engine/
+
 ![](screenshots/2023-01-08_12-01.png)

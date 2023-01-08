@@ -605,31 +605,36 @@ class App {
         })
         App.$oCatalogGroupsEdit.click(() => {
             var oGroup = App.fnGetByID("groups", App.sCatalogGroupID)
-            var sName = prompt("Группа", oGroup.name)
-            if (sName) {
-                App.fnUpdateRecord("groups", oGroup.id, {"name": sName})
-                App.fnUpdate()
-                App.fnWriteNotesDatabase()
+            if (oGroup) {
+                var sName = prompt("Группа", oGroup.name)
+                if (sName) {
+                    App.fnUpdateRecord("groups", oGroup.id, {"name": sName})
+                    App.fnUpdate()
+                    App.fnWriteNotesDatabase()
+                }
             }
         })
         App.$oCatalogCategoryEdit.click(() => {
             var oCategory = App.fnGetByID("categories", App.sCatalogCategoryID)
-            var sName = prompt("Категория", oCategory.name)
-            if (sName) {
-                App.fnUpdateRecord("categories", oCategory.id, {"name": sName})
-                App.fnUpdate()
-                App.fnWriteNotesDatabase()
+            if (oCategory) {
+                var sName = prompt("Категория", oCategory.name)
+                if (sName) {
+                    App.fnUpdateRecord("categories", oCategory.id, {"name": sName})
+                    App.fnUpdate()
+                    App.fnWriteNotesDatabase()
+                }
             }
         })
         App.$oCatalogArticleEdit.click(() => {
             var oArticle = App.fnGetByID("articles", App.sArticleID)
-            var sName = prompt("Статья", oArticle.name)
-            if (sName) {
-                App.fnUpdateRecord("articles", oArticle.id, {"name": sName})
-                App.fnUpdate()
-                App.fnWriteNotesDatabase()
+            if (oArticle) {
+                var sName = prompt("Статья", oArticle.name)
+                if (sName) {
+                    App.fnUpdateRecord("articles", oArticle.id, {"name": sName})
+                    App.fnUpdate()
+                    App.fnWriteNotesDatabase()
+                }
             }
-            
         })
         // App.$oCatalogArticleRemove.click(() => {
             

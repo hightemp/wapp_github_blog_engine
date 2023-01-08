@@ -576,6 +576,7 @@ class App {
                     "html": ""
                 })
                 App.fnUpdate()
+                App.fnWriteNotesDatabase()
             }
         })
         App.$oCatalogCategoryCreate.click(() => {
@@ -587,6 +588,7 @@ class App {
                     "html": ""
                 })
                 App.fnUpdate()
+                App.fnWriteNotesDatabase()
             }
         })
         App.$oCatalogArticleCreate.click(() => {
@@ -598,6 +600,7 @@ class App {
                     "html": ""
                 })
                 App.fnUpdate()
+                App.fnWriteNotesDatabase()
             }
         })
         App.$oCatalogGroupsEdit.click(() => {
@@ -606,6 +609,7 @@ class App {
             if (sName) {
                 App.fnUpdateRecord("groups", oGroup.id, {"name": sName})
                 App.fnUpdate()
+                App.fnWriteNotesDatabase()
             }
         })
         App.$oCatalogCategoryEdit.click(() => {
@@ -614,6 +618,7 @@ class App {
             if (sName) {
                 App.fnUpdateRecord("categories", oCategory.id, {"name": sName})
                 App.fnUpdate()
+                App.fnWriteNotesDatabase()
             }
         })
         App.$oCatalogArticleEdit.click(() => {
@@ -622,6 +627,7 @@ class App {
             if (sName) {
                 App.fnUpdateRecord("articles", oArticle.id, {"name": sName})
                 App.fnUpdate()
+                App.fnWriteNotesDatabase()
             }
             
         })

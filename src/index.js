@@ -5,7 +5,8 @@ import { Octokit } from "@octokit/rest";
 import $ from "jquery";
 import { encode, decode } from 'js-base64';
 
-// import Quill from 'quill';
+import Quill from 'quill'
+import 'quill/dist/quill.snow.css'
 
 // NOTE: Хелперы
 var fnGetUpdateMessage = (() => "update: "+(new Date()))
@@ -104,6 +105,8 @@ class App {
     static get $oPageEditWrapper() { return $(".page-edit") }
     static get $oPagePanel() { return $(".page-panel") }
     static get $oPageEdit() { return $("#page-edit") }
+
+    static get $oPageSaveBtn() { return $("#page-save-btn") }
 
     // NOTE: 
 
@@ -279,6 +282,7 @@ class App {
     {
         App.fnUpdate()
         console.log('fnWriteNotesDatabase', App.oDatabase);
+        App.bDirty = false
         return App.octokit.rest.repos.createOrUpdateFileContents({
             owner: App.sLogin,
             repo: App.sRepo,
@@ -294,6 +298,7 @@ class App {
     static fnUpdateNoteDatabase()
     {
         if (App.bDirty) {
+            App.fnPrepareEditorContents()
             App.fnWriteNotesDatabase();
         }
         setTimeout(App.fnUpdateNoteDatabase, App.DATABASE_UPDATE_TIMEOUT);
@@ -436,6 +441,19 @@ class App {
         return App.oDatabase.articles.filter((oI) => oI.id == iID)
     }
 
+    static fnGetEditorContent()
+    {
+        var editor = document.getElementsByClassName('ql-editor')
+        return editor[0].innerHTML
+    }
+
+    static fnSetEditorContent(sHTML)
+    {
+        var editor = document.getElementsByClassName('ql-editor')
+        editor[0].innerHTML = sHTML
+        App.bDirty = true;
+    }
+
     static fnUpdateEditor()
     {
         if (!App.sArticleID) {
@@ -445,8 +463,7 @@ class App {
             App.$oPagePanel.removeClass('hidden')
             var aR = App.fnFilterArticlesByID(App.sArticleID);
             if (aR.length) {
-                var editor = document.getElementsByClassName('ql-editor')
-                editor[0].innerHTML = aR[0].html
+                App.fnSetEditorContent(aR[0].html)
             } else {
                 App.$oPagePanel.addClass('hidden')
                 App.oEditor.setContents('')
@@ -479,6 +496,25 @@ class App {
         })
     }
 
+    static fnPrepareEditorContents()
+    {
+        var sHTML = App.fnGetEditorContent()
+        App.fnUpdateRecord("articles", App.sArticleID, { html: sHTML })
+    }
+
+    static fnSaveEditorContents()
+    {
+        App.fnPrepareEditorContents()
+        App.fnWriteNotesDatabase()
+    }
+
+    static fnBindArticlesActionsBtn()
+    {
+        App.$oPageSaveBtn.click(() => {
+            App.fnSaveEditorContents()
+        })
+    }
+
     static fnBind()
     {
         console.log('fnBind')
@@ -488,6 +524,7 @@ class App {
         App.fnBindCatalogCategoryList()
         App.fnBindCatalogArticlesList()
         App.fnBindArticlesList()
+        App.fnBindArticlesActionsBtn()
     }
 
     static fnBindApp()

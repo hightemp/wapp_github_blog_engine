@@ -180,7 +180,7 @@ class App {
 
     static fnAddRecord(sTable, oData)
     {
-        var sLastID = App.oDatabase[sTable+"_last_id"] + 1
+        var sLastID = App.oDatabase[sTable+"_last_id"]*1 + 1
         App.oDatabase[sTable].push({
             "id": sLastID,
             ...oData
@@ -332,30 +332,30 @@ class App {
         return aMarkdown
     }
 
-    static fnGenerateIndexPage()
+    static async fnGenerateIndexPage()
     {
         var aMarkdown = [`# Оглавление\n`]
 
         aMarkdown = aMarkdown.concat(App.fnRenderGroups())
         var sMarkdown = aMarkdown.join(`\n`)
 
-        App.fnPublishDocument(`index.md`, sMarkdown)
+        await App.fnPublishDocument(`index.md`, sMarkdown)
         // console.log()
     }
 
-    static fnGenerateMarkdownPages()
+    static async fnGenerateMarkdownPages()
     {
         var aR = App.oDatabase.articles
         for (var oI of aR) {
             var sP = App.fnGetArticlePath(oI.id)
-            App.fnPublishDocument(sP, oI.html)
+            await App.fnPublishDocument(sP, oI.html)
         }
     }
 
-    static fnGeneratePages()
+    static async fnGeneratePages()
     {
-        App.fnGenerateIndexPage()
-        App.fnGenerateMarkdownPages()
+        await App.fnGenerateIndexPage()
+        await App.fnGenerateMarkdownPages()
     }
 
     static async fnPublishDocument(sPath, sContent)

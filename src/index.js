@@ -111,6 +111,16 @@ class App {
 
     static get $oPageSaveBtn() { return $("#page-save-btn") }
 
+    static get $oCatalogGroupsCreate() { return $("#catalog-groups-create") }
+    static get $oCatalogGroupsEdit() { return $("#catalog-groups-edit") }
+    static get $oCatalogGroupsRemove() { return $("#catalog-groups-remove") }
+    static get $oCatalogCategoryCreate() { return $("#catalog-category-create") }
+    static get $oCatalogCategoryEdit() { return $("#catalog-category-edit") }
+    static get $oCatalogCategoryRemove() { return $("#catalog-category-remove") }
+    static get $oCatalogArticleCreate() { return $("#catalog-article-create") }
+    static get $oCatalogArticleEdit() { return $("#catalog-article-edit") }
+    static get $oCatalogArticleRemove() { return $("#catalog-article-remove") }
+
     // NOTE: 
 
     static fnUpdateRecord(sTable, sRecordID, oData)
@@ -549,6 +559,44 @@ class App {
 
     static fnBindApp()
     {
+        App.$oCatalogGroupsCreate.click(() => {
+            var sName = prompt("Группа")
+            if (sName) {
+                App.fnAddRecord("groups", {
+                    "name": sName,
+                    "html": ""
+                })
+                App.fnUpdate()
+            }
+        })
+        App.$oCatalogCategoryCreate.click(() => {
+            var sName = prompt("Категория")
+            if (sName) {
+                App.fnAddRecord("categories", {
+                    "group_id": App.sCatalogGroupID,
+                    "name": sName,
+                    "html": ""
+                })
+                App.fnUpdate()
+            }
+        })
+        App.$oCatalogArticleCreate.click(() => {
+            var sName = prompt("Статья")
+            if (sName) {
+                App.fnAddRecord("articles", {
+                    "category_id": App.sCatalogCategoryID,
+                    "name": sName,
+                    "html": ""
+                })
+                App.fnUpdate()
+            }
+        })
+        // App.$oCatalogArticleEdit.click(() => {
+            
+        // })
+        // App.$oCatalogArticleRemove.click(() => {
+            
+        // })
         App.$oInfoSaveBtn.click(() => {
             var bEmpty = false;
             App.$oFormValidatorIsEmpty.each((iI, oE) => bEmpty |= oE.value.trim() == "")

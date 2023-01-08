@@ -36,6 +36,21 @@ class App {
             {"id":4, "name": "Test 4", "category_id": "1", "html": "sadf asfdasf asdf"},
             {"id":5, "name": "Derartige zum Ausgleich", "category_id": "2", "html": "sadf asfdasf asdf"},
             {"id":6, "name": "der bei der Kapitalklasse vorgenommen werden", "category_id": "3", "html": "sadf asfdasf asdf"},
+        ],
+        "favorites_last_id": "1",
+        "favorites": [
+            {"id":1, "article_id":"1"},
+        ],
+        "tags_last_id": "4",
+        "tags": [
+            {"id":1, "name":"computer"},
+            {"id":2, "name":"testing"},
+            {"id":3, "name":"development"},
+            {"id":4, "name":"lorem"},
+        ],
+        "tags_relataions_last_id": "1",
+        "tags_relations": [
+            {"id":1, "tag_id":"1", "article_id":"1"},
         ]
     }
 
@@ -118,17 +133,22 @@ class App {
     static get $oExportBtn() { return $("#app-export-btn") }
     static get $oImportBtn() { return $("#app-import-btn") }
 
+    static get $oCatalogGroupsReload() { return $("#catalog-groups-reload") }
     static get $oCatalogGroupsCreate() { return $("#catalog-groups-create") }
     static get $oCatalogGroupsEdit() { return $("#catalog-groups-edit") }
     static get $oCatalogGroupsRemove() { return $("#catalog-groups-remove") }
+
+    static get $oCatalogCategoryReload() { return $("#catalog-category-reload") }
     static get $oCatalogCategoryCreate() { return $("#catalog-category-create") }
     static get $oCatalogCategoryEdit() { return $("#catalog-category-edit") }
     static get $oCatalogCategoryRemove() { return $("#catalog-category-remove") }
+
+    static get $oCatalogArticleReload() { return $("#catalog-article-reload") }
     static get $oCatalogArticleCreate() { return $("#catalog-article-create") }
     static get $oCatalogArticleEdit() { return $("#catalog-article-edit") }
     static get $oCatalogArticleRemove() { return $("#catalog-article-remove") }
 
-    
+    static get $oAllArticlesReload() { return $("#all-articles-reload") }
 
     // NOTE: 
 
@@ -618,6 +638,16 @@ class App {
         }
     }
 
+    static fnUpdateFavorites()
+    {
+        
+    }
+
+    static fnUpdateTags()
+    {
+
+    }
+
     static fnUpdate()
     {
         App.fnUpdateCatalogGroups()
@@ -625,6 +655,8 @@ class App {
         App.fnUpdateCatalogArticles()
         App.fnUpdateEditor()
         App.fnUpdateAllArticles()
+        App.fnUpdateFavorites()
+        App.fnUpdateTags()
     }
 
     static fnBindCatalog()
@@ -676,6 +708,18 @@ class App {
 
     static fnBindApp()
     {
+        App.$oAllArticlesReload.click(() => {
+            App.fnUpdateAllArticles()
+        })
+        App.$oCatalogGroupsReload.click(() => {
+            App.fnUpdateCatalogGroups()
+        })
+        App.$oCatalogCategoryReload.click(() => {
+            App.fnUpdateCatalogCategories()
+        })
+        App.$oCatalogArticleReload.click(() => {
+            App.fnUpdateCatalogArticles()
+        })
         App.$oCatalogGroupsCreate.click(() => {
             var sName = prompt("Группа")
             if (sName) {

@@ -663,7 +663,7 @@ class App {
     {
         if (!App.sArticleID) {
             App.$oPagePanel.addClass('hidden')
-            App.oEditor.setContents('')
+            App.fnSetEditorContent('')
         } else {
             App.$oPagePanel.removeClass('hidden')
             var aR = App.fnFilterArticlesByID(App.sArticleID);
@@ -671,7 +671,7 @@ class App {
                 App.fnSetEditorContent(aR[0].html)
             } else {
                 App.$oPagePanel.addClass('hidden')
-                App.oEditor.setContents('')
+                App.fnSetEditorContent('')
             }
         }
     }

@@ -123,6 +123,15 @@ class App {
 
     // NOTE: 
 
+    static fnGetByID(sTable, sRecordID)
+    {
+        var aR = App.oDatabase[sTable].filter((oI) => oI.id == sRecordID)
+        if (aR.length) {
+            return aR[0]
+        }
+        return null
+    }
+
     static fnUpdateRecord(sTable, sRecordID, oData)
     {
         var aR = App.oDatabase[sTable].filter((oI) => oI.id == sRecordID)
@@ -591,9 +600,31 @@ class App {
                 App.fnUpdate()
             }
         })
-        // App.$oCatalogArticleEdit.click(() => {
+        App.$oCatalogGroupsEdit.click(() => {
+            var oGroup = App.fnGetByID("groups", App.sCatalogGroupID)
+            var sName = prompt("Группа", oGroup.name)
+            if (sName) {
+                App.fnUpdateRecord("groups", oGroup.id, {"name": sName})
+                App.fnUpdate()
+            }
+        })
+        App.$oCatalogCategoryEdit.click(() => {
+            var oCategory = App.fnGetByID("categories", App.sCatalogCategoryID)
+            var sName = prompt("Категория", oCategory.name)
+            if (sName) {
+                App.fnUpdateRecord("categories", oCategory.id, {"name": sName})
+                App.fnUpdate()
+            }
+        })
+        App.$oCatalogArticleEdit.click(() => {
+            var oArticle = App.fnGetByID("articles", App.sArticleID)
+            var sName = prompt("Статья", oArticle.name)
+            if (sName) {
+                App.fnUpdateRecord("articles", oArticle.id, {"name": sName})
+                App.fnUpdate()
+            }
             
-        // })
+        })
         // App.$oCatalogArticleRemove.click(() => {
             
         // })

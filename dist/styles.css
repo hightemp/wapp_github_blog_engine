@@ -92,7 +92,7 @@ body, html {
 }
 
 .all-articles-panel {
-    display: flex;
+    
 }
 
 .actions-panel {
@@ -172,3 +172,9 @@ a {
     color: white;
 }
 
+.tree-spacer {
+    width: 8px;
+    display: inline-block;
+}
+
+fnUpdateAllArticles

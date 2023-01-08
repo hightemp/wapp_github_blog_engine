@@ -33,6 +33,8 @@ class App {
             {"id":2, "name": "Test 2", "category_id": "1", "html": "dfasdf"},
             {"id":3, "name": "Test 3", "category_id": "1", "html": "asdfas fdasf"},
             {"id":4, "name": "Test 4", "category_id": "1", "html": "sadf asfdasf asdf"},
+            {"id":5, "name": "Derartige zum Ausgleich", "category_id": "2", "html": "sadf asfdasf asdf"},
+            {"id":6, "name": "der bei der Kapitalklasse vorgenommen werden", "category_id": "3", "html": "sadf asfdasf asdf"},
         ]
     }
     // NOTE: Константы
@@ -155,6 +157,7 @@ class App {
         App.fnUpdateCatalogGroups()
         App.fnUpdateCatalogCategories()
         App.fnUpdateCatalogArticles()
+        App.fnUpdateAllArticles()
     }
 
     static fnChangeCatalogCategory(sCategoryID)
@@ -164,12 +167,14 @@ class App {
         App.fnUpdateCatalogGroups()
         App.fnUpdateCatalogCategories()
         App.fnUpdateCatalogArticles()
+        App.fnUpdateAllArticles()
     }
 
     static fnChangeArticle(sArticleID)
     {
         App.sArticleID = sArticleID
         App.fnUpdateCatalogArticles()
+        App.fnUpdateAllArticles()
         App.fnUpdateEditor()
     }
 
@@ -190,7 +195,7 @@ class App {
         })
     }
 
-    static fnBindCatelogGroupList()
+    static fnBindCatalogGroupList()
     {
         $(document).click((oEvent) => {
             // App.$oCatalogGroupsPanel
@@ -203,7 +208,7 @@ class App {
         })
     }
 
-    static fnBindCatelogCategoryList()
+    static fnBindCatalogCategoryList()
     {
         $(document).click((oEvent) => {
             // App.$oCatalogCategoriesPanel
@@ -226,11 +231,23 @@ class App {
         })
     }
 
-    static fnBindCatelogArticlesList()
+    static fnBindCatalogArticlesList()
     {
         $(document).click((oEvent) => {
             // App.$oCatalogArticlesPanel
             if ($(oEvent.target).parents(".articles-panel").length) {
+                var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                var sID = oDiv.data("id")
+                console.log("sArticleID", sID)
+                App.fnChangeArticle(sID)
+            }
+        })
+    }
+
+    static fnBindArticlesList()
+    {
+        $(document).click((oEvent) => {
+            if ($(oEvent.target).parents(".all-articles-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
                 console.log("sArticleID", sID)
@@ -294,6 +311,15 @@ class App {
         }
     }
 
+    static fnUpdateAllArticles()
+    {
+        console.log('fnUpdateAllArticles')
+        var aR = App.oDatabase.articles
+        var sHTML = App.fnRenderList(aR, App.sArticleID)
+        console.log(App.$oAllArticlesList)
+        App.$oAllArticlesList.html(sHTML)
+    }
+
     static fnRenderList(aR, sSelID="")
     {
         var sHTML = ``
@@ -326,7 +352,7 @@ class App {
         App.$oCatalogGroupsList.html(sHTML)
     }
 
-    static fnRenderTree(aR, sSelID="", iParentID=null)
+    static fnRenderTree(aR, sSelID="", iParentID=null, iLevel=0)
     {
         var sHTML = ``
 
@@ -344,6 +370,7 @@ class App {
             }
 
             var sSelClass = sSelID == oI.id ? "active" : ""
+            var sSpacer = `<div class="tree-spacer"></div>`.repeat(iLevel)
 
             sHTML += `
             <div class="input-group item-tree-row ${sSelClass}" data-id="${oI.id}" data-opened="${1*oI.is_opened}">
@@ -357,13 +384,13 @@ class App {
                     class="list-group-item list-group-item-action item-title ${oI.id == App.sSelCategory ? 'active' : ''}"
                     data-id="${oI.id}"
                 >
-                    <div>${oI.name}</div>
+                    ${sSpacer}<div>${oI.name}</div>
                 </a>
             </div>
             `
 
             if (oI.is_opened) {
-                sHTML += App.fnRenderTree(aR, sSelID, oI.id)
+                sHTML += App.fnRenderTree(aR, sSelID, oI.id, iLevel+1)
             }
         }
 
@@ -433,6 +460,7 @@ class App {
         App.fnUpdateCatalogCategories()
         App.fnUpdateCatalogArticles()
         App.fnUpdateEditor()
+        App.fnUpdateAllArticles()
     }
 
     static fnBindCatalog()
@@ -456,9 +484,10 @@ class App {
         console.log('fnBind')
         App.fnBindMode()
         App.fnBindApp()
-        App.fnBindCatelogGroupList()
-        App.fnBindCatelogCategoryList()
-        App.fnBindCatelogArticlesList()
+        App.fnBindCatalogGroupList()
+        App.fnBindCatalogCategoryList()
+        App.fnBindCatalogArticlesList()
+        App.fnBindArticlesList()
     }
 
     static fnBindApp()
@@ -515,15 +544,16 @@ class App {
         App.fnGetNotesDatabase()
             .then(() => {
                 App.fnChangeMode("catalog")
+                
                 App.fnUpdate();
                 App.fnUpdateNoteDatabase();
             })
             .catch((sAnsw) => {
                 if (/Not Found/.test(sAnsw)) {
-                    if (confirm('База не найдена. Создать базу в репозиториии?')) {
-                        App.bDirty = true;
-                        App.fnUpdateNoteDatabase();
-                    }
+                    // if (confirm('База не найдена. Создать базу в репозиториии?')) {
+                    App.bDirty = true;
+                    App.fnUpdateNoteDatabase();
+                    // }
                 } else {
                     alert(sAnsw);
                 }

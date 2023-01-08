@@ -346,7 +346,7 @@ class App {
     static fnGenerateMarkdownPages()
     {
         var aR = App.oDatabase.articles
-        for (oI of aR) {
+        for (var oI of aR) {
             var sP = App.fnGetArticlePath(oI.id)
             App.fnPublishDocument(sP, oI.html)
         }

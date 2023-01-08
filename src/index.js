@@ -115,6 +115,9 @@ class App {
 
     static get $oPublishBtn() { return $("#app-publish-btn") }
 
+    static get $oExportBtn() { return $("#app-export-btn") }
+    static get $oImportBtn() { return $("#app-import-btn") }
+
     static get $oCatalogGroupsCreate() { return $("#catalog-groups-create") }
     static get $oCatalogGroupsEdit() { return $("#catalog-groups-edit") }
     static get $oCatalogGroupsRemove() { return $("#catalog-groups-remove") }
@@ -228,6 +231,19 @@ class App {
         App.$oPublishBtn.click(() => {
             App.fnGenerateIndexPage()
         })
+        App.$oExportBtn.click(() => {
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(App.oDatabase));
+            var dlAnchorElem = document.createElement("A");
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `database_${(new Date).getTime()}.json`);
+            dlAnchorElem.click();
+            // document.body.appendChild(dlAnchorElem)
+            // console.log(dlAnchorElem)
+            dlAnchorElem.remove()
+        })
+        App.$oImportBtn.click(() => {
+            
+        })
     }
 
     static fnRenderArticles(iCategoryID, iLevel=1)
@@ -293,7 +309,7 @@ class App {
 
     static async fnPublishDocument(sPath, sContent)
     {
-        if (!App.oDocuments[sPath]) {
+        if (!App.oDocuments[sPath] || !App.oDocuments[sPath].sha) {
             await App.octokit.rest.repos.getContent({
                 owner: App.sLogin,
                 repo: App.sRepo,
@@ -306,7 +322,7 @@ class App {
             owner: App.sLogin,
             repo: App.sRepo,
             path: sPath,
-            sha: App.oDocuments[sPath].sha,
+            sha: App.oDocuments[sPath] ? App.oDocuments[sPath].sha : null,
             message: fnGetUpdateMessage(),
             content: encode(sContent)
         })

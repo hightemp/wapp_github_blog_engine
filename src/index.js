@@ -282,13 +282,18 @@ class App {
         return `articles/${iID}.md`
     }
 
+    static fnGetArticlePathURL(iID)
+    {
+        return `blob/main/articles/${iID}.md`
+    }
+
     static fnRenderArticles(iCategoryID, iLevel=1)
     {
         var aR = App.fnFilterArticlesByCategory(iCategoryID)
         var aMarkdown = []
 
         for (var oArticle of aR) {
-            aMarkdown.push(` `.repeat(iLevel*2) + `* [${oArticle.name}](${App.fnGetArticlePath(oArticle.id)})`)
+            aMarkdown.push(` `.repeat(iLevel*2) + `* - [${oArticle.name}](${App.fnGetArticlePathURL(oArticle.id)})`)
         }
 
         return aMarkdown
@@ -730,7 +735,8 @@ class App {
             App.fnSaveEditorContents()
         })
         App.$oPageLinkBtn.click(() => {
-            window.open(`https://github.com/${App.sLogin}/${App.sRepo}/${App.sFilePath}`)
+            var sPath = App.fnGetArticlePathURL(App.sArticleID)
+            window.open(`https://github.com/${App.sLogin}/${App.sRepo}/${sPath}`)
         })
     }
 

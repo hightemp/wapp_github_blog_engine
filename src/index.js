@@ -235,7 +235,8 @@ class App {
     static fnChangeArticle(sArticleID)
     {
         App.sArticleID = sArticleID
-        var sID = App.fnFilterArticlesByID(sArticleID).id
+        var aArticles = App.fnFilterArticlesByID(sArticleID)
+        var sID = aArticles[0].id
         App.sFilePath = App.fnGetArticlePath(sID)
         App.fnUpdateCatalogArticles()
         App.fnUpdateAllArticles()
@@ -344,7 +345,11 @@ class App {
 
     static fnGenerateMarkdownPages()
     {
-
+        var aR = App.oDatabase.articles
+        for (oI of aR) {
+            var sP = App.fnGetArticlePath(oI.id)
+            App.fnPublishDocument(sP, oI.html)
+        }
     }
 
     static fnGeneratePages()

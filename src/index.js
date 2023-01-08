@@ -76,6 +76,8 @@ class App {
     static sRepo = ''
     static sAPIKey = ''
 
+    static sFilePath = ''
+
     // NOTE: Стейты
     static aModes = ["catalog", "list", "favorites", "tags"]
     static sMode = "catalog"
@@ -83,6 +85,9 @@ class App {
     static sCatalogGroupID = ""
     static sCatalogCategoryID = ""
     static sArticleID = ""
+
+    static sFavoriteID = ""
+    static sTagID = ""
 
     static oDocuments = {}
 
@@ -95,6 +100,8 @@ class App {
     static get $oCatalogGroupsPanel() { return $(".groups-panel") }
     static get $oCatalogCategoriesPanel() { return $(".categories-panel") }
     static get $oCatalogArticlesPanel() { return $(".articles-panel") }
+    static get $oTagsList() { return $(".tags-panel .list") }
+    static get $oFavoritesList() { return $(".favorites-panel .list") }
 
     static get $oFormValidatorIsEmpty() { return $(".is-empty") }
 
@@ -127,6 +134,7 @@ class App {
     static get $oPageEdit() { return $("#page-edit") }
 
     static get $oPageSaveBtn() { return $("#page-save-btn") }
+    static get $oPageLinkBtn() { return $("#page-link-btn") }
 
     static get $oPublishBtn() { return $("#app-publish-btn") }
 
@@ -227,6 +235,8 @@ class App {
     static fnChangeArticle(sArticleID)
     {
         App.sArticleID = sArticleID
+        var sID = App.fnFilterArticlesByID(sArticleID).id
+        App.sFilePath = App.fnGetArticlePath(sID)
         App.fnUpdateCatalogArticles()
         App.fnUpdateAllArticles()
         App.fnUpdateEditor()
@@ -249,7 +259,7 @@ class App {
         })
         // NOTE: Опубликовать в виде страниц
         App.$oPublishBtn.click(() => {
-            App.fnGenerateIndexPage()
+            App.fnGeneratePages()
         })
         App.$oExportBtn.click(() => {
             var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(App.oDatabase));
@@ -266,13 +276,18 @@ class App {
         })
     }
 
+    static fnGetArticlePath(iID)
+    {
+        return `articles/${iID}.md`
+    }
+
     static fnRenderArticles(iCategoryID, iLevel=1)
     {
         var aR = App.fnFilterArticlesByCategory(iCategoryID)
         var aMarkdown = []
 
         for (var oArticle of aR) {
-            aMarkdown.push(` `.repeat(iLevel*2) + `* ` +oArticle.name)
+            aMarkdown.push(` `.repeat(iLevel*2) + `* [${oArticle.name}](${App.fnGetArticlePath(oArticle.id)})`)
         }
 
         return aMarkdown
@@ -286,7 +301,7 @@ class App {
             if (!oCategory.parent_id) oCategory.parent_id = null
             if (!iParentID) iParentID = null
             if (oCategory.parent_id!=iParentID) continue
-            aMarkdown.push(` `.repeat(iLevel*2) + `- ` +oCategory.name)
+            aMarkdown.push(` `.repeat(iLevel*2) + `- ${oCategory.name}`)
             aMarkdown = aMarkdown.concat(App.fnRenderCategoriesList(aR, oCategory.id, iLevel+1))
             aMarkdown = aMarkdown.concat(App.fnRenderArticles(oCategory.id, iLevel+1))
         }
@@ -325,6 +340,17 @@ class App {
 
         App.fnPublishDocument(`index.md`, sMarkdown)
         // console.log()
+    }
+
+    static fnGenerateMarkdownPages()
+    {
+
+    }
+
+    static fnGeneratePages()
+    {
+        App.fnGenerateIndexPage()
+        App.fnGenerateMarkdownPages()
     }
 
     static async fnPublishDocument(sPath, sContent)
@@ -492,18 +518,20 @@ class App {
         App.$oAllArticlesList.html(sHTML)
     }
 
-    static fnRenderList(aR, sSelID="")
+    static fnRenderList(aR, sSelID="", fnHook=()=>{})
     {
         var sHTML = ``
         console.log("fnRenderList", sSelID)
 
         for (var oI of aR) {
             var sSelClass = sSelID == oI.id ? "active" : ""
+            var sHTMLHook = (fnHook(oI) || "")
             sHTML += `
             <div class="input-group item-row ${sSelClass}" data-id="${oI.id}">
                 <div class="input-group-text">
                     <input class="form-check-input mt-0 cb-groups" type="checkbox" value="${oI.id}" id="group-${oI.id}" />
                 </div>
+                ${sHTMLHook}
                 <a 
                     class="list-group-item list-group-item-action item-title ${oI.id == App.sSelGroup ? 'active' : ''}" 
                     data-id="${oI.id}"
@@ -640,12 +668,16 @@ class App {
 
     static fnUpdateFavorites()
     {
-        
+        var aR = (App.oDatabase.favorites || [])
+        var sHTML = App.fnRenderList(aR, App.sFavoriteID)
+        App.$oFavoritesList.html(sHTML)
     }
 
     static fnUpdateTags()
     {
-
+        var aR = (App.oDatabase.tags || [])
+        var sHTML = App.fnRenderList(aR, App.sTagID)
+        App.$oTagsList.html(sHTML)
     }
 
     static fnUpdate()
@@ -691,6 +723,9 @@ class App {
     {
         App.$oPageSaveBtn.click(() => {
             App.fnSaveEditorContents()
+        })
+        App.$oPageLinkBtn.click(() => {
+            window.open(`https://github.com/${App.sLogin}/${App.sRepo}/${App.sFilePath}`)
         })
     }
 

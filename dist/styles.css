@@ -31,6 +31,11 @@ body, html {
     bottom: 0px;
     display: grid;
     grid-template-columns: 30px 1fr 1fr;
+    background: #eee;
+}
+
+.wrapper > * {
+    background: white;
 }
 
 .app-modes > * {
@@ -161,3 +166,9 @@ body, html {
 a {
     cursor: pointer;
 }
+
+.active .list-group-item {
+    background: blue;
+    color: white;
+}
+

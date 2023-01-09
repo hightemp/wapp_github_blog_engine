@@ -515,7 +515,6 @@ class App {
         console.log('fnUpdateAllArticles')
         var aR = App.oDatabase.articles
         var sHTML = App.fnRenderList(aR, App.sArticleID)
-        console.log(App.$oAllArticlesList)
         App.$oAllArticlesList.html(sHTML)
     }
 

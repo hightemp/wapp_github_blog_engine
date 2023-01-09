@@ -68,14 +68,16 @@ body, html {
     grid-template-rows: 30px 1fr;
 }
 
-.categories-panel .list {
+.list {
+    border-top: 1px solid #eee;
     overflow-y: scroll;
     height: 100%;
+    height: calc(100vh - 31px);
     max-height: calc(100vh - 31px);
 }
 
-.list {
-    border-top: 1px solid #eee;
+.tags-panel {
+    border-right: 1px solid #eee;
 }
 
 .page-panel {
@@ -135,6 +137,10 @@ body, html {
     border-left: 2px solid red;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+}
+
+#mode-links {
+    border-left: 2px solid cornflowerblue;
 }
 
 .item-row {

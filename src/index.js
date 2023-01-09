@@ -80,15 +80,12 @@ class App {
     static sFilePath = ''
 
     // NOTE: Стейты
-    static aModes = ["catalog", "list", "favorites", "tags"]
+    static aModes = ["catalog", "list", "favorites", "tags", "links"]
     static sMode = "catalog"
 
     static sCatalogGroupID = ""
     static sCatalogCategoryID = ""
     static sArticleID = ""
-    static sTagID = ""
-
-    static sFavoriteID = ""
     static sTagID = ""
 
     static oDocuments = {}
@@ -103,6 +100,7 @@ class App {
     static get $oCatalogCategoriesPanel() { return $(".categories-panel") }
     static get $oCatalogArticlesPanel() { return $(".articles-panel") }
     static get $oTagsList() { return $(".tags-panel .list") }
+    static get $oTagsArticlesList() { return $(".tags-articles-panel .list") }
     static get $oFavoritesList() { return $(".favorites-panel .list") }
 
     static get $oFormValidatorIsEmpty() { return $(".is-empty") }
@@ -126,6 +124,8 @@ class App {
     static get $oModeFavorites() { return $("#mode-favorites") }
     static get $oModeTagsBtn() { return $("#app-mode-tags") }
     static get $oModeTags() { return $("#mode-tags") }
+    static get $oModeLinksBtn() { return $("#app-mode-links") }
+    static get $oModeLinks() { return $("#mode-links") }
 
     static get $oModeCatalogGroupItems() { return App.$oModeCatalog.find(".groups-panel .item-title") }
     static get $oModeCatalogCategoryItems() { return App.$oModeCatalog.find(".categories-panel .item-title") }
@@ -210,6 +210,10 @@ class App {
             App.$oModeTagsBtn.addClass("btn-primary")
             App.$oModeTags.removeClass("hidden")
         }
+        if (sNewMode=="links") {
+            App.$oModeLinksBtn.addClass("btn-primary")
+            App.$oModeLinks.removeClass("hidden")
+        }
         App.sMode = sNewMode
     }
 
@@ -243,6 +247,15 @@ class App {
         App.fnUpdateCatalogArticles()
         App.fnUpdateAllArticles()
         App.fnUpdateEditor()
+        App.fnUpdateFavorites()
+        App.fnUpdateTagsArticles()
+    }
+
+    static fnChangeTag(sTagID)
+    {
+        App.sTagID = sTagID
+        App.fnUpdateTags()
+        App.fnUpdateTagsArticles()
     }
 
     static fnBindMode()
@@ -259,6 +272,9 @@ class App {
         })
         App.$oModeTagsBtn.click(() => {
             App.fnChangeMode("tags")
+        })
+        App.$oModeLinksBtn.click(() => {
+            App.fnChangeMode("links")
         })
         // NOTE: Опубликовать в виде страниц
         App.$oPublishBtn.click(() => {
@@ -383,67 +399,6 @@ class App {
             sha: App.oDocuments[sPath] ? App.oDocuments[sPath].sha : null,
             message: fnGetUpdateMessage(),
             content: encode(sContent)
-        })
-    }
-
-    static fnBindCatalogGroupList()
-    {
-        $(document).click((oEvent) => {
-            // App.$oCatalogGroupsPanel
-            if ($(oEvent.target).parents(".groups-panel").length) {
-                var oDiv = $($(oEvent.target).parents(".input-group")[0])
-                var sID = oDiv.data("id")
-                console.log("sGroupID", sID)
-                App.fnChangeCatalogGroup(sID)
-            }
-        })
-    }
-
-    static fnBindCatalogCategoryList()
-    {
-        $(document).click((oEvent) => {
-            // App.$oCatalogCategoriesPanel
-            if ($(oEvent.target).parents(".categories-panel").length) {
-                if ($(oEvent.target).parents(".item-flag-group").length) {
-                    var oDiv = $($(oEvent.target).parents(".input-group")[0])
-                    var sOpened = oDiv.data("opened")*1
-                    var sID = oDiv.data("id")
-                    console.log('sOpened', sOpened)
-                    App.fnUpdateRecord("categories", sID, { is_opened: !sOpened })
-                    console.log(App.oDatabase)
-                    App.fnUpdateCatalogCategories()
-                } else {
-                    var oDiv = $($(oEvent.target).parents(".input-group")[0])
-                    var sID = oDiv.data("id")
-                    console.log("sCategoryID", sID)
-                    App.fnChangeCatalogCategory(sID)
-                }
-            }
-        })
-    }
-
-    static fnBindCatalogArticlesList()
-    {
-        $(document).click((oEvent) => {
-            // App.$oCatalogArticlesPanel
-            if ($(oEvent.target).parents(".articles-panel").length) {
-                var oDiv = $($(oEvent.target).parents(".input-group")[0])
-                var sID = oDiv.data("id")
-                console.log("sArticleID", sID)
-                App.fnChangeArticle(sID)
-            }
-        })
-    }
-
-    static fnBindArticlesList()
-    {
-        $(document).click((oEvent) => {
-            if ($(oEvent.target).parents(".all-articles-panel").length) {
-                var oDiv = $($(oEvent.target).parents(".input-group")[0])
-                var sID = oDiv.data("id")
-                console.log("sArticleID", sID)
-                App.fnChangeArticle(sID)
-            }
         })
     }
 
@@ -718,9 +673,8 @@ class App {
     static fnUpdateFavorites()
     {
         var aR = (App.oDatabase.favorites || [])
-        aR = aR.map((oFI) => App.oDatabase.articles.filter((oAI) => oAI.id = oFI.article_id)[0])
-        console.log('>>>', aR)
-        var sHTML = App.fnRenderList(aR, App.sFavoriteID)
+        aR = aR.map((oFI) => App.oDatabase.articles.filter((oAI) => oAI.id == oFI.article_id)[0])
+        var sHTML = App.fnRenderList(aR, App.sArticleID)
         App.$oFavoritesList.html(sHTML)
     }
 
@@ -729,6 +683,15 @@ class App {
         var aR = (App.oDatabase.tags || [])
         var sHTML = App.fnRenderList(aR, App.sTagID)
         App.$oTagsList.html(sHTML)
+    }
+
+    static fnUpdateTagsArticles()
+    {
+        var aR = (App.oDatabase.tags_relations || [])
+        aR = aR.filter((oI) => oI.tag_id == App.sTagID )
+        aR = aR.map((oFI) => App.oDatabase.articles.filter((oAI) => oAI.id == oFI.article_id)[0])
+        var sHTML = App.fnRenderList(aR, App.sArticleID)
+        App.$oTagsArticlesList.html(sHTML)
     }
 
     static fnUpdate()
@@ -740,22 +703,6 @@ class App {
         App.fnUpdateAllArticles()
         App.fnUpdateFavorites()
         App.fnUpdateTags()
-    }
-
-    static fnBindCatalog()
-    {
-        App.$oModeCatalogGroupItems.click(() => {
-            var sID = $(this).data("id")
-            App.fnChangeCatalogGroup(sID)
-        })
-        App.$oModeCatalogCategoryItems.click(() => {
-            var sID = $(this).data("id")
-            App.fnChangeCatalogCategory(sID)
-        })
-        App.$oModeCatalogArticleItems.click(() => {
-            var sID = $(this).data("id")
-            App.fnChangeArticle(sID)
-        })
     }
 
     static fnPrepareEditorContents()
@@ -770,7 +717,14 @@ class App {
         App.fnWriteNotesDatabase()
     }
 
-    static fnBindArticlesActionsBtn()
+    static fnBind()
+    {
+        console.log('fnBind')
+        App.fnBindMode()
+        App.fnBindApp()
+    }
+
+    static fnBindApp()
     {
         App.$oPageSaveBtn.click(() => {
             App.fnSaveEditorContents()
@@ -779,22 +733,78 @@ class App {
             var sPath = App.fnGetArticlePathURL(App.sArticleID)
             window.open(`https://github.com/${App.sLogin}/${App.sRepo}/${sPath}`)
         })
-    }
 
-    static fnBind()
-    {
-        console.log('fnBind')
-        App.fnBindMode()
-        App.fnBindApp()
-        App.fnBindCatalogGroupList()
-        App.fnBindCatalogCategoryList()
-        App.fnBindCatalogArticlesList()
-        App.fnBindArticlesList()
-        App.fnBindArticlesActionsBtn()
-    }
+        $(document).click((oEvent) => {
+            if ($(oEvent.target).parents(".favorites-panel").length) {
+                var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                var sID = oDiv.data("id")
+                console.log("sArticleID", sID)
+                App.fnChangeArticle(sID)
+            }
+            if ($(oEvent.target).parents(".tags-panel").length) {
+                var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                var sID = oDiv.data("id")
+                console.log("sTagID", sID)
+                App.fnChangeTag(sID)
+            }
+            if ($(oEvent.target).parents(".tags-articles-panel").length) {
+                var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                var sID = oDiv.data("id")
+                console.log("sArticleID", sID)
+                App.fnChangeArticle(sID)
+            }
+            if ($(oEvent.target).parents(".all-articles-panel").length) {
+                var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                var sID = oDiv.data("id")
+                console.log("sArticleID", sID)
+                App.fnChangeArticle(sID)
+            }
+            // App.$oCatalogArticlesPanel
+            if ($(oEvent.target).parents(".articles-panel").length) {
+                var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                var sID = oDiv.data("id")
+                console.log("sArticleID", sID)
+                App.fnChangeArticle(sID)
+            }
+            // App.$oCatalogCategoriesPanel
+            if ($(oEvent.target).parents(".categories-panel").length) {
+                if ($(oEvent.target).parents(".item-flag-group").length) {
+                    var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                    var sOpened = oDiv.data("opened")*1
+                    var sID = oDiv.data("id")
+                    console.log('sOpened', sOpened)
+                    App.fnUpdateRecord("categories", sID, { is_opened: !sOpened })
+                    console.log(App.oDatabase)
+                    App.fnUpdateCatalogCategories()
+                } else {
+                    var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                    var sID = oDiv.data("id")
+                    console.log("sCategoryID", sID)
+                    App.fnChangeCatalogCategory(sID)
+                }
+            }
+            // App.$oCatalogGroupsPanel
+            if ($(oEvent.target).parents(".groups-panel").length) {
+                var oDiv = $($(oEvent.target).parents(".input-group")[0])
+                var sID = oDiv.data("id")
+                console.log("sGroupID", sID)
+                App.fnChangeCatalogGroup(sID)
+            }
+        })
 
-    static fnBindApp()
-    {
+        App.$oModeCatalogGroupItems.click(() => {
+            var sID = $(this).data("id")
+            App.fnChangeCatalogGroup(sID)
+        })
+        App.$oModeCatalogCategoryItems.click(() => {
+            var sID = $(this).data("id")
+            App.fnChangeCatalogCategory(sID)
+        })
+        App.$oModeCatalogArticleItems.click(() => {
+            var sID = $(this).data("id")
+            App.fnChangeArticle(sID)
+        })
+
         App.$oCatalogGroupsRemove.click(() => {
             App.fnRemoveCatalogGroup(App.sCatalogGroupID)
         })
@@ -820,6 +830,7 @@ class App {
         App.$oCatalogArticleReload.click(() => {
             App.fnUpdateCatalogArticles()
         })
+
         App.$oCatalogGroupsCreate.click(() => {
             var sName = prompt("Группа")
             if (sName) {

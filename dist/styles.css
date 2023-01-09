@@ -127,6 +127,8 @@ body, html {
 
 #mode-tags {
     border-left: 2px solid blue;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
 #mode-catalog {

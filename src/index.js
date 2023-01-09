@@ -86,6 +86,7 @@ class App {
     static sCatalogGroupID = ""
     static sCatalogCategoryID = ""
     static sArticleID = ""
+    static sTagID = ""
 
     static sFavoriteID = ""
     static sTagID = ""
@@ -717,6 +718,8 @@ class App {
     static fnUpdateFavorites()
     {
         var aR = (App.oDatabase.favorites || [])
+        aR = aR.map((oFI) => App.oDatabase.articles.filter((oAI) => oAI.id = oFI.article_id)[0])
+        console.log('>>>', aR)
         var sHTML = App.fnRenderList(aR, App.sFavoriteID)
         App.$oFavoritesList.html(sHTML)
     }

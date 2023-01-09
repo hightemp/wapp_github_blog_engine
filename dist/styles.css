@@ -177,4 +177,12 @@ a {
     display: inline-block;
 }
 
-fnUpdateAllArticles
+.ql-editor {
+    max-height: 90vh;
+    max-width: 50vw;
+}
+
+.ql-editor img {
+    width: 100% !important;
+    height: auto !important;
+}

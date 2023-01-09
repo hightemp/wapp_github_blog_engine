@@ -454,30 +454,30 @@ class App {
     {
         var iIndex = App.oDatabase.groups.findIndex((oI) => oI.id==sGroupID)
         delete App.oDatabase.groups[iIndex]
+        App.oDatabase.groups.splice(iIndex, 1)
         App.fnWriteNotesDatabase()
         App.sCatalogGroupID = ""
         App.sCatalogCategoryID = ""
         App.sArticleID = ""
-        App.fnUpdate()
     }
 
     static fnRemoveCatalogCategory(sCategoryID)
     {
         var iIndex = App.oDatabase.categories.findIndex((oI) => oI.id==sCategoryID)
         delete App.oDatabase.categories[iIndex]
+        App.oDatabase.categories.splice(iIndex, 1)
         App.fnWriteNotesDatabase()
         App.sCatalogCategoryID = ""
         App.sArticleID = ""
-        App.fnUpdate()
     }
 
     static fnRemoveCatalogArticle(sArticleID)
     {
         var iIndex = App.oDatabase.articles.findIndex((oI) => oI.id==sArticleID)
         delete App.oDatabase.articles[iIndex]
+        App.oDatabase.articles.splice(iIndex, 1)
         App.fnWriteNotesDatabase()
         App.sArticleID = ""
-        App.fnUpdate()
     }
 
     static fnGetSHADatabase()
@@ -521,6 +521,10 @@ class App {
             sha: App.SHA,
             message: fnGetUpdateMessage(),
             content: encode(sData)
+        }).then(() => {
+            const toastLiveExample = document.getElementById('liveToast')
+            const toast = new bootstrap.Toast(toastLiveExample)
+            toast.show()
         })
     }
 
@@ -564,6 +568,7 @@ class App {
         console.log("fnRenderList", sSelID)
 
         for (var oI of aR) {
+            if (!oI) continue;
             var sSelClass = sSelID == oI.id ? "active" : ""
             var sHTMLHook = (fnHook(oI) || "")
             sHTML += `
@@ -597,6 +602,7 @@ class App {
         var sHTML = ``
 
         for (var oI of aR) {
+            if (!oI) continue;
             if (!iParentID) iParentID = null
             console.log("fnRenderTree", oI.parent_id,iParentID)
             if (oI.parent_id!=iParentID) {

@@ -4,12 +4,19 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Octokit } from "@octokit/rest";
 import $ from "jquery";
+var jQuery = $
+global.jQuery = $
 import { encode, decode } from 'js-base64';
+
+import './bootstrap-duallistbox.min.css'
+import bootstrapDualListbox from './jquery.bootstrap-duallistbox.min'
 
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 
 // NOTE: Хелперы
+console.log(jQuery)
+
 var fnGetUpdateMessage = (() => "update: "+(new Date()))
 var _$ = (s, b=document.body) => document.body.querySelector.apply(b, [s])
 var _$$ = (s, b=document.body) => document.body.querySelectorAll.apply(b, [s])
@@ -70,6 +77,8 @@ class App {
     static bDirty = false
     static sSelGroup = ''
     static sSelCategory = ''
+
+    static oArticlesTagsList = null
 
     static oEditor = null
     // NOTE: Переменные - Данные
@@ -160,6 +169,14 @@ class App {
 
     static get $oAllArticlesReload() { return $("#all-articles-reload") }
 
+    static get $oModelEditArticle() { return $("#modal-edit-article") }
+    static get $oArticleEditSave() { return $("#article-edit-save") }
+    static get $oArticleTagsBox1Select() { return $("#article-tags .box1 select") }
+    static get $oArticleTagsBox2Select() { return $("#article-tags .box2 select") }
+    static get $oArticleModelEditName() { return $("#article-name") }
+    static get $oArticleModelEditGroup() { return $("#article-group") }
+    static get $oArticleModelEditCategory() { return $("#article-category") }
+
     // NOTE: 
 
     static fnGetByID(sTable, sRecordID)
@@ -242,8 +259,10 @@ class App {
     {
         App.sArticleID = sArticleID
         var aArticles = App.fnFilterArticlesByID(sArticleID)
-        var sID = aArticles[0].id
-        App.sFilePath = App.fnGetArticlePath(sID)
+        if (aArticles.length) {
+            var sID = aArticles[0].id
+            App.sFilePath = App.fnGetArticlePath(sID)
+        }
         App.fnUpdateCatalogArticles()
         App.fnUpdateAllArticles()
         App.fnUpdateEditor()
@@ -426,6 +445,11 @@ class App {
         App.fnWriteNotesDatabase()
         App.sCatalogCategoryID = ""
         App.sArticleID = ""
+    }
+
+    static fnGetCurrentArticle()
+    {
+        return App.oDatabase.articles.find((oI) => oI.id==App.sArticleID)
     }
 
     static fnRemoveCatalogArticle(sArticleID)
@@ -723,6 +747,78 @@ class App {
         App.fnBindApp()
     }
 
+    static fnRenderListToTags(aList)
+    {
+        var sHTML = ``
+        for (var oItem of aList) {
+            sHTML += `<option value="${oItem.id}">${oItem.name}</option>`
+        }
+    }
+
+    static fnUpdateArticlesTagsList(bEmptyForm)
+    {
+        if (bEmptyForm) {
+            App.$oArticleTagsBox1Select.html('')
+            App.$oArticleTagsBox2Select.html('')
+        } else {
+            if (!App.oArticlesTagsList) {
+                App.oArticlesTagsList = $('#article-tags').bootstrapDualListbox({
+                    nonSelectedListLabel: 'Non-selected',
+                    selectedListLabel: 'Selected',
+                    preserveSelectionOnMove: 'moved',
+                    moveOnSelect: false,
+                });
+            }
+            var sHTML = ``
+            sHTML = App.fnRenderListToTags(App.oDatabase.tags)
+            App.$oArticleTagsBox1Select.append(sHTML)
+            var aTags = App.oDatabase.tags_relations.filter((oI) => oI.article_id == App.sArticleID)
+            aTags = aTags.map((oI) => App.oDatabase.tags.filter((oTI) => oTI.id = oI.tag_id)[0])
+            sHTML = App.fnRenderListToTags(aTags)
+            App.$oArticleTagsBox2Select.append(sHTML)
+        }
+    }
+
+    static fnUpdateArticlesName(bEmptyForm)
+    {
+        if (bEmptyForm) {
+            App.$oArticleModelEditName.val('')
+        } else {
+            var oArticle = App.fnGetCurrentArticle()
+            App.$oArticleModelEditName.val(oArticle.name)
+        }
+    }
+
+    static fnUpdateArticlesGroupsList(bEmptyForm)
+    {
+        if (bEmptyForm) {
+            App.$oArticleModelEditGroup.html('')
+        } else {
+            var sHTML = ``
+            sHTML = App.fnRenderListToTags(App.oDatabase.groups)
+            App.$oArticleModelEditGroup.html(sHTML)
+        }
+    }
+
+    static fnUpdateArticlesCategoryList(bEmptyForm)
+    {
+        if (bEmptyForm) {
+            App.$oArticleModelEditCategory.html('')
+        } else {
+            var sHTML = ``
+            sHTML = App.fnRenderCategoriesList(App.oDatabase.categories)
+            App.$oArticleModelEditCategory.html(sHTML)
+        }
+    }
+
+    static fnUpdateArticlesModel(bEmptyForm=false)
+    {
+        App.fnUpdateArticlesName(bEmptyForm)
+        App.fnUpdateArticlesTagsList(bEmptyForm)
+        App.fnUpdateArticlesGroupsList(bEmptyForm)
+        App.fnUpdateArticlesCategoryList(bEmptyForm)
+    }
+
     static fnBindApp()
     {
         App.$oPageSaveBtn.click(() => {
@@ -854,15 +950,11 @@ class App {
             }
         })
         App.$oCatalogArticleCreate.click(() => {
-            var sName = prompt("Статья")
-            if (sName) {
-                App.fnAddRecord("articles", {
-                    "category_id": App.sCatalogCategoryID,
-                    "name": sName,
-                    "html": ""
-                })
-                App.fnUpdate()
-                App.fnWriteNotesDatabase()
+            var oArticle = App.fnGetByID("articles", App.sArticleID)
+            if (oArticle) {
+                App.fnUpdateArticlesModel(true)
+                App.$oModelEditArticle.show()
+                App.fnUpdateArticlesTagsList()
             }
         })
         App.$oCatalogGroupsEdit.click(() => {
@@ -888,16 +980,22 @@ class App {
             }
         })
         App.$oCatalogArticleEdit.click(() => {
+            console.log('$oCatalogArticleEdit')
             var oArticle = App.fnGetByID("articles", App.sArticleID)
             if (oArticle) {
-                var sName = prompt("Статья", oArticle.name)
-                if (sName) {
-                    App.fnUpdateRecord("articles", oArticle.id, {"name": sName})
-                    App.fnUpdate()
-                    App.fnWriteNotesDatabase()
-                }
+                App.fnUpdateArticlesModel()
+                App.$oModelEditArticle.show()
+                App.fnUpdateArticlesTagsList()
             }
         })
+
+        App.$oArticleEditSave.click(() => {
+            App.fnUpdateRecord("articles", oArticle.id, {"name": sName})
+            App.fnUpdate()
+            App.fnWriteNotesDatabase()
+            App.$oModelEditArticle.hide()
+        })
+
         // App.$oCatalogArticleRemove.click(() => {
             
         // })
@@ -977,18 +1075,6 @@ class App {
 }
 
 $(document).ready(() => {
-    // Extend jQuery.fn with our new method
-    var jQuery = $
-    jQuery.extend( jQuery.fn, {
-        // Name of our method & one argument (the parent selector)
-        within: function( pSelector ) {
-            // Returns a subset of items using jQuery.filter
-            return this.filter(function(){
-                // Return truthy/falsey based on presence in parent
-                return $(this).closest( pSelector ).length;
-            });
-        }
-    });
     App.fnStart()
 });
 

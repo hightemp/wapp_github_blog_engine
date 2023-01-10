@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@octokit/rest": "^19.0.5",
     "bootstrap": "^5.2.3",
+    "bootstrap-duallistbox": "^3.0.9",
     "bootstrap-icons": "^1.10.2",
     "jquery": "^3.6.3",
     "js-base64": "^3.7.3",

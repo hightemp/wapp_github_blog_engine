@@ -156,6 +156,39 @@
         </div>
     </div>
 
+    <div class="modal" id="modal-edit-article" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title">Статья</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="" class="form-label">Название</label>
+                        <input type="text" class="form-control" id="article-name" aria-describedby="">
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label">Группа</label>
+                        <select class="form-control" id="article-group" aria-describedby=""></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label">Категория</label>
+                        <select class="form-control" id="article-category" aria-describedby=""></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label">Тэги</label>
+                        <div id="article-tags"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button id="article-edit-save" type="button" class="btn btn-success">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">

@@ -4,18 +4,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Octokit } from "@octokit/rest";
 import $ from "jquery";
-var jQuery = $
-global.jQuery = $
 import { encode, decode } from 'js-base64';
-
-import './bootstrap-duallistbox.min.css'
-import bootstrapDualListbox from './jquery.bootstrap-duallistbox.min'
 
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 
 // NOTE: Хелперы
-console.log(jQuery)
 
 var fnGetUpdateMessage = (() => "update: "+(new Date()))
 var _$ = (s, b=document.body) => document.body.querySelector.apply(b, [s])
@@ -169,13 +163,20 @@ class App {
 
     static get $oAllArticlesReload() { return $("#all-articles-reload") }
 
+    static oModelEditArticle = null
     static get $oModelEditArticle() { return $("#modal-edit-article") }
     static get $oArticleEditSave() { return $("#article-edit-save") }
-    static get $oArticleTagsBox1Select() { return $("#article-tags .box1 select") }
-    static get $oArticleTagsBox2Select() { return $("#article-tags .box2 select") }
+    static get $oArticleTagsBox1Select() { return $("#article-tags .box1") }
+    static get $oArticleTagsBox2Select() { return $("#article-tags .box2") }
     static get $oArticleModelEditName() { return $("#article-name") }
     static get $oArticleModelEditGroup() { return $("#article-group") }
     static get $oArticleModelEditCategory() { return $("#article-category") }
+
+    static get $oArticleMoveAllTags2to1Btn() { return $("#article-tags .tags-list-all-2-1") }
+    static get $oArticleMoveTags2to1Btn() { return $("#article-tags .tags-list-one-2-1") }
+    static get $oArticleMoveAllTags1to2Btn() { return $("#article-tags .tags-list-all-1-2") }
+    static get $oArticleMoveTags1to2Btn() { return $("#article-tags .tags-list-one-1-2") }
+
 
     // NOTE: 
 
@@ -747,36 +748,30 @@ class App {
         App.fnBindApp()
     }
 
-    static fnRenderListToTags(aList)
+    static fnRenderOptionsList(aList, sSelID)
     {
         var sHTML = ``
         for (var oItem of aList) {
-            sHTML += `<option value="${oItem.id}">${oItem.name}</option>`
+            var sSelected = sSelID == oItem.id ? 'selected' : ''
+            sHTML += `<option value="${oItem.id}" ${sSelected}>${oItem.name}</option>`
         }
+        return sHTML
     }
 
     static fnUpdateArticlesTagsList(bEmptyForm)
     {
+        var sHTML = ``
+        sHTML = App.fnRenderOptionsList(App.oDatabase.tags)
+        App.$oArticleTagsBox1Select.append(sHTML)
+        var aTags = App.oDatabase.tags_relations.filter((oI) => oI.article_id == App.sArticleID)
+        aTags = aTags.map((oI) => App.oDatabase.tags.filter((oTI) => oTI.id == oI.tag_id)[0])
         if (bEmptyForm) {
-            App.$oArticleTagsBox1Select.html('')
-            App.$oArticleTagsBox2Select.html('')
+            sHTML = ''
         } else {
-            if (!App.oArticlesTagsList) {
-                App.oArticlesTagsList = $('#article-tags').bootstrapDualListbox({
-                    nonSelectedListLabel: 'Non-selected',
-                    selectedListLabel: 'Selected',
-                    preserveSelectionOnMove: 'moved',
-                    moveOnSelect: false,
-                });
-            }
-            var sHTML = ``
-            sHTML = App.fnRenderListToTags(App.oDatabase.tags)
-            App.$oArticleTagsBox1Select.append(sHTML)
-            var aTags = App.oDatabase.tags_relations.filter((oI) => oI.article_id == App.sArticleID)
-            aTags = aTags.map((oI) => App.oDatabase.tags.filter((oTI) => oTI.id = oI.tag_id)[0])
-            sHTML = App.fnRenderListToTags(aTags)
-            App.$oArticleTagsBox2Select.append(sHTML)
+            sHTML = App.fnRenderOptionsList(aTags)
         }
+        App.$oArticleTagsBox2Select.append(sHTML)
+
     }
 
     static fnUpdateArticlesName(bEmptyForm)
@@ -789,34 +784,77 @@ class App {
         }
     }
 
-    static fnUpdateArticlesGroupsList(bEmptyForm)
+    static fnUpdateArticlesCategoryList()
     {
-        if (bEmptyForm) {
-            App.$oArticleModelEditGroup.html('')
-        } else {
-            var sHTML = ``
-            sHTML = App.fnRenderListToTags(App.oDatabase.groups)
-            App.$oArticleModelEditGroup.html(sHTML)
+        var sHTML = ``
+        var aR = []
+        for (var oC of App.oDatabase.categories) {
+            var aGr = App.oDatabase.groups.filter((oG) => oG.id == oC.group_id )
+            var oCF = Object.assign({}, oC)
+            oCF.name = `${aGr[0].name} - ${oCF.name}`
+            aR = aR.concat(oCF)
         }
-    }
-
-    static fnUpdateArticlesCategoryList(bEmptyForm)
-    {
-        if (bEmptyForm) {
-            App.$oArticleModelEditCategory.html('')
-        } else {
-            var sHTML = ``
-            sHTML = App.fnRenderCategoriesList(App.oDatabase.categories)
-            App.$oArticleModelEditCategory.html(sHTML)
-        }
+        sHTML = App.fnRenderOptionsList(aR, App.sCatalogCategoryID)
+        App.$oArticleModelEditCategory.html(sHTML)
     }
 
     static fnUpdateArticlesModel(bEmptyForm=false)
     {
         App.fnUpdateArticlesName(bEmptyForm)
         App.fnUpdateArticlesTagsList(bEmptyForm)
-        App.fnUpdateArticlesGroupsList(bEmptyForm)
-        App.fnUpdateArticlesCategoryList(bEmptyForm)
+        App.fnUpdateArticlesCategoryList()
+    }
+
+    static fnShowArticleEditModal(bEmptyForm=false)
+    {
+        App.fnUpdateArticlesModel(bEmptyForm)
+        if (!App.oModelEditArticle) {
+            App.oModelEditArticle = new bootstrap.Modal(App.$oModelEditArticle, {})
+        }
+        App.oModelEditArticle.show()
+    }
+
+    static fnHideArticleEditModal()
+    {
+        App.oModelEditArticle.hide()
+    }
+
+    static fnGetArticleBox1TagsList(bSelected=false)
+    {
+        var aOpts = []
+        if (bSelected) {
+            aOpts = $.makeArray(App.$oArticleTagsBox1Select.find("option:selected"))
+        } else {
+            aOpts = $.makeArray(App.$oArticleTagsBox1Select.find("option"))
+        }
+        aOpts = aOpts.map((oE) => App.oDatabase.tags.filter((oT) => oT.id == $(oE).attr("value"))[0])
+        return JSON.parse(JSON.stringify(aOpts))
+    }
+
+    static fnGetArticleBox2TagsList(bSelected=false)
+    {
+        var aOpts = []
+        if (bSelected) {
+            aOpts = $.makeArray(App.$oArticleTagsBox2Select.find("option:selected"))
+        } else {
+            aOpts = $.makeArray(App.$oArticleTagsBox2Select.find("option"))
+        }
+        aOpts = aOpts.map((oE) => App.oDatabase.tags.filter((oT) => oT.id == $(oE).attr("value"))[0])
+        return JSON.parse(JSON.stringify(aOpts))
+    }
+
+    static fnRenderBox1List(aList)
+    {
+        var sHTML = ''
+        sHTML = App.fnRenderOptionsList(aList)
+        App.$oArticleTagsBox1Select.html(sHTML)
+    }
+
+    static fnRenderBox2List(aList)
+    {
+        var sHTML = ''
+        sHTML = App.fnRenderOptionsList(aList)
+        App.$oArticleTagsBox2Select.html(sHTML)
     }
 
     static fnBindApp()
@@ -827,6 +865,33 @@ class App {
         App.$oPageLinkBtn.click(() => {
             var sPath = App.fnGetArticlePathURL(App.sArticleID)
             window.open(`https://github.com/${App.sLogin}/${App.sRepo}/${sPath}`)
+        })
+
+        App.$oArticleMoveAllTags2to1Btn.click(() => {
+            var aBox2Tags = App.fnGetArticleBox2TagsList()
+            aBox2Tags = []
+            App.fnRenderBox2List(aBox2Tags)
+        })
+        App.$oArticleMoveTags2to1Btn.click(() => {
+            var aBox1Tags = App.fnGetArticleBox1TagsList()
+            var aAllBox2Tags = App.fnGetArticleBox2TagsList()
+            var aBox2Tags = App.fnGetArticleBox2TagsList(true)
+            aBox2Tags = aAllBox2Tags.filter((oI, iN, aA) => !~aBox2Tags.findIndex((oAI) => oAI.id == oI.id))
+            App.fnRenderBox2List(aBox2Tags)
+        })
+        App.$oArticleMoveAllTags1to2Btn.click(() => {
+            var aBox1Tags = App.fnGetArticleBox1TagsList()
+            var aBox2Tags = App.fnGetArticleBox2TagsList()
+            aBox2Tags = aBox2Tags.concat(aBox1Tags)
+            aBox2Tags = aBox2Tags.filter((oI, iN, aA) => iN==aA.findIndex((oAI) => oAI.id == oI.id))
+            App.fnRenderBox2List(aBox2Tags)
+        })
+        App.$oArticleMoveTags1to2Btn.click(() => {
+            var aBox1Tags = App.fnGetArticleBox1TagsList(true)
+            var aBox2Tags = App.fnGetArticleBox2TagsList()
+            aBox2Tags = aBox2Tags.concat(aBox1Tags)
+            aBox2Tags = aBox2Tags.filter((oI, iN, aA) => iN==aA.findIndex((oAI) => oAI.id == oI.id))
+            App.fnRenderBox2List(aBox2Tags)
         })
 
         $(document).click((oEvent) => {
@@ -886,6 +951,10 @@ class App {
                 App.fnChangeCatalogGroup(sID)
             }
         })
+
+        // $(".btn-close").click(() => {
+        //     $(oEvent.target).parents(".modal")[0].modal("hide")
+        // })
 
         App.$oModeCatalogGroupItems.click(() => {
             var sID = $(this).data("id")
@@ -950,12 +1019,7 @@ class App {
             }
         })
         App.$oCatalogArticleCreate.click(() => {
-            var oArticle = App.fnGetByID("articles", App.sArticleID)
-            if (oArticle) {
-                App.fnUpdateArticlesModel(true)
-                App.$oModelEditArticle.show()
-                App.fnUpdateArticlesTagsList()
-            }
+            App.fnShowArticleEditModal(true)
         })
         App.$oCatalogGroupsEdit.click(() => {
             var oGroup = App.fnGetByID("groups", App.sCatalogGroupID)
@@ -983,9 +1047,7 @@ class App {
             console.log('$oCatalogArticleEdit')
             var oArticle = App.fnGetByID("articles", App.sArticleID)
             if (oArticle) {
-                App.fnUpdateArticlesModel()
-                App.$oModelEditArticle.show()
-                App.fnUpdateArticlesTagsList()
+                App.fnShowArticleEditModal(false)
             }
         })
 

@@ -194,3 +194,18 @@ a {
     width: 100% !important;
     height: auto !important;
 }
+
+.tags-lists {
+    display: grid;
+    grid-template-columns: 1fr 30px 1fr;
+}
+
+.tags-lists select {
+    overflow-y: scroll;
+    max-height: 120px;
+}
+
+.tags-lists-buttons {
+    display: flex;
+    flex-wrap: wrap;
+}

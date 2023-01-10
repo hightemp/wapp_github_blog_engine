@@ -206,6 +206,7 @@ class App {
             ...oData
         })
         App.oDatabase[sTable+"_last_id"] = sLastID
+        return sLastID
     }
 
     static fnChangeMode(sNewMode)
@@ -762,7 +763,7 @@ class App {
     {
         var sHTML = ``
         sHTML = App.fnRenderOptionsList(App.oDatabase.tags)
-        App.$oArticleTagsBox1Select.append(sHTML)
+        App.$oArticleTagsBox1Select.html(sHTML)
         var aTags = App.oDatabase.tags_relations.filter((oI) => oI.article_id == App.sArticleID)
         aTags = aTags.map((oI) => App.oDatabase.tags.filter((oTI) => oTI.id == oI.tag_id)[0])
         if (bEmptyForm) {
@@ -770,7 +771,7 @@ class App {
         } else {
             sHTML = App.fnRenderOptionsList(aTags)
         }
-        App.$oArticleTagsBox2Select.append(sHTML)
+        App.$oArticleTagsBox2Select.html(sHTML)
 
     }
 
@@ -855,6 +856,34 @@ class App {
         var sHTML = ''
         sHTML = App.fnRenderOptionsList(aList)
         App.$oArticleTagsBox2Select.html(sHTML)
+    }
+
+    static fnSaveCurrentArticleTags()
+    {
+        var aTagsRel = App.oDatabase.tags_relations
+        // Удаляем старые связи
+        aTagsRel = aTagsRel.filter((oI) => oI.article_id != App.sArticleID)
+        var aTags = App.fnGetArticleBox2TagsList()
+        for (var oTag of aTags) {
+            App.fnAddRecord("tags_relations", { "tag_id": oTag.id, "article_id": App.sArticleID })
+        }
+    }
+
+    static fnSaveArticle()
+    {
+        if (App.sArticleID == "") {
+            // Если статьи нет, то создаем ее
+            App.sArticleID = App.fnAddRecord("articles", {category_id:"",name:"",html:""})
+        }
+        var oObj = {
+            name: App.$oArticleModelEditName.val(),
+            category_id: App.$oArticleModelEditCategory.val()
+        }
+        console.log("!!!1", oObj, App.sArticleID)
+        App.fnUpdateRecord("articles", App.sArticleID, oObj)
+        App.fnSaveCurrentArticleTags()
+        App.fnWriteNotesDatabase()
+        App.fnUpdate()
     }
 
     static fnBindApp()
@@ -1052,10 +1081,8 @@ class App {
         })
 
         App.$oArticleEditSave.click(() => {
-            App.fnUpdateRecord("articles", oArticle.id, {"name": sName})
-            App.fnUpdate()
-            App.fnWriteNotesDatabase()
-            App.$oModelEditArticle.hide()
+            App.fnSaveArticle()
+            App.oModelEditArticle.hide()
         })
 
         // App.$oCatalogArticleRemove.click(() => {

@@ -259,6 +259,7 @@ class App {
 
     static fnChangeArticle(sArticleID)
     {
+        console.error(['fnChangeArticle', arguments])
         App.sArticleID = sArticleID
         var aArticles = App.fnFilterArticlesByID(sArticleID)
         if (aArticles.length) {
@@ -862,26 +863,33 @@ class App {
     {
         var aTagsRel = App.oDatabase.tags_relations
         // Удаляем старые связи
-        aTagsRel = aTagsRel.filter((oI) => oI.article_id != App.sArticleID)
+        App.oDatabase.tags_relations = aTagsRel.filter((oI) => oI.article_id != App.sArticleID)
         var aTags = App.fnGetArticleBox2TagsList()
         for (var oTag of aTags) {
             App.fnAddRecord("tags_relations", { "tag_id": oTag.id, "article_id": App.sArticleID })
         }
+    }
+    
+    static {
+        setInterval(() => {
+            console.log(App.sArticleID)
+        }, 3000)
     }
 
     static fnSaveArticle()
     {
         if (App.sArticleID == "") {
             // Если статьи нет, то создаем ее
-            App.sArticleID = App.fnAddRecord("articles", {category_id:"",name:"",html:""})
+            // App.sArticleID = App.fnAddRecord("articles", {category_id:"",name:"",html:""})
         }
         var oObj = {
             name: App.$oArticleModelEditName.val(),
             category_id: App.$oArticleModelEditCategory.val()
         }
-        console.log("!!!1", oObj, App.sArticleID)
+        console.log("!!!1", oObj, App, App.sArticleID)
         App.fnUpdateRecord("articles", App.sArticleID, oObj)
         App.fnSaveCurrentArticleTags()
+        console.log("!!!2", App.oDatabase)
         App.fnWriteNotesDatabase()
         App.fnUpdate()
     }
@@ -927,33 +935,43 @@ class App {
             if ($(oEvent.target).parents(".favorites-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
-                console.log("sArticleID", sID)
-                App.fnChangeArticle(sID)
+                if (sID) {
+                    console.log("sArticleID", sID)
+                    App.fnChangeArticle(sID)
+                }
             }
             if ($(oEvent.target).parents(".tags-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
-                console.log("sTagID", sID)
-                App.fnChangeTag(sID)
+                if (sID) {
+                    console.log("sTagID", sID)
+                    App.fnChangeTag(sID)
+                }
             }
             if ($(oEvent.target).parents(".tags-articles-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
-                console.log("sArticleID", sID)
-                App.fnChangeArticle(sID)
+                if (sID) {
+                    console.log("sArticleID", sID)
+                    App.fnChangeArticle(sID)
+                }
             }
             if ($(oEvent.target).parents(".all-articles-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
-                console.log("sArticleID", sID)
-                App.fnChangeArticle(sID)
+                if (sID) {
+                    console.log("sArticleID", sID)
+                    App.fnChangeArticle(sID)
+                }
             }
             // App.$oCatalogArticlesPanel
             if ($(oEvent.target).parents(".articles-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
-                console.log("sArticleID", sID)
-                App.fnChangeArticle(sID)
+                if (sID) {
+                    console.log("sArticleID", sID)
+                    App.fnChangeArticle(sID)
+                }
             }
             // App.$oCatalogCategoriesPanel
             if ($(oEvent.target).parents(".categories-panel").length) {
@@ -962,22 +980,28 @@ class App {
                     var sOpened = oDiv.data("opened")*1
                     var sID = oDiv.data("id")
                     console.log('sOpened', sOpened)
-                    App.fnUpdateRecord("categories", sID, { is_opened: !sOpened })
-                    console.log(App.oDatabase)
-                    App.fnUpdateCatalogCategories()
+                    if (sID) { 
+                        App.fnUpdateRecord("categories", sID, { is_opened: !sOpened })
+                        console.log(App.oDatabase)
+                        App.fnUpdateCatalogCategories()
+                    }
                 } else {
                     var oDiv = $($(oEvent.target).parents(".input-group")[0])
                     var sID = oDiv.data("id")
-                    console.log("sCategoryID", sID)
-                    App.fnChangeCatalogCategory(sID)
+                    if (sID) {
+                        console.log("sCategoryID", sID)
+                        App.fnChangeCatalogCategory(sID)
+                    }
                 }
             }
             // App.$oCatalogGroupsPanel
             if ($(oEvent.target).parents(".groups-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
-                console.log("sGroupID", sID)
-                App.fnChangeCatalogGroup(sID)
+                if (sID) {
+                    console.log("sGroupID", sID)
+                    App.fnChangeCatalogGroup(sID)
+                }
             }
         })
 

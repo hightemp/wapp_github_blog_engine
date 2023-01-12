@@ -162,6 +162,14 @@ class App {
     static get $oCatalogArticleRemove() { return $("#catalog-article-remove") }
 
     static get $oAllArticlesReload() { return $("#all-articles-reload") }
+    static get $oAllArticlesCreate() { return $("#all-articles-create") }
+    static get $oAllArticlesEdit() { return $("#all-articles-edit") }
+    static get $oAllArticlesRemove() { return $("#all-articles-remove") }
+
+    static get $oFavoritesReload() { return $("#favorites-reload") }
+    static get $oFavoritesCreate() { return $("#favorites-groups-create") }
+    static get $oFavoritesEdit() { return $("#favorites-groups-edit") }
+    static get $oFavoritesRemove() { return $("#favorites-groups-remove") }
 
     static oModelEditArticle = null
     static get $oModelEditArticle() { return $("#modal-edit-article") }
@@ -1109,9 +1117,22 @@ class App {
             App.oModelEditArticle.hide()
         })
 
-        // App.$oCatalogArticleRemove.click(() => {
-            
-        // })
+        App.$oAllArticlesReload.click(() => {
+            App.fnUpdateAllArticles()
+        })
+        App.$oAllArticlesCreate.click(() => {
+            App.fnShowArticleEditModal(true)
+        })
+        App.$oAllArticlesEdit.click(() => {
+            var oArticle = App.fnGetByID("articles", App.sArticleID)
+            if (oArticle) {
+                App.fnShowArticleEditModal(false)
+            }
+        })
+        App.$oAllArticlesRemove.click(() => {
+            App.fnRemoveCatalogArticle(App.sArticleID)
+        })
+
         App.$oInfoSaveBtn.click(() => {
             var bEmpty = false;
             App.$oFormValidatorIsEmpty.each((iI, oE) => bEmpty |= oE.value.trim() == "")

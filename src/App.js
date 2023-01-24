@@ -11,6 +11,7 @@ import { ModeTagsController } from './ModeTagsController'
 import { Octokit } from "@octokit/rest";
 import { ModeController } from './ModeController'
 import { ArticlesController } from './ArticlesController'
+import * as bootstrap from 'bootstrap'
 
 export class App {
     static fnShowSavingToast()

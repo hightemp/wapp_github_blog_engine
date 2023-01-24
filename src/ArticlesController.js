@@ -4,6 +4,7 @@ import { Database } from "./Database";
 
 import { ModeCatalogController } from "./ModeCatalogController"
 import { Render } from "./Render"
+import * as bootstrap from 'bootstrap'
 
 export class ArticlesController {
     // NOTE: Окно сохранения

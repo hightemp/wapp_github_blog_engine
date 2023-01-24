@@ -48,6 +48,7 @@ export class App {
 
     static fnStartApp()
     {
+        _l('App.fnStartApp')
         Editor.fnRender()
         Database.fnParseAPIInfo()
 

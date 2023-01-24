@@ -38,6 +38,7 @@ export class Editor {
                 Editor.fnSaveEditorContents()
             }
         });
+        Editor.$oPagePanel.addClass('hidden')
     }
 
     // ===============================================================

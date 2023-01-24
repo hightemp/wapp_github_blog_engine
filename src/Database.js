@@ -7,6 +7,7 @@ import { MODE_CATALOG, ModeController } from './ModeController'
 import { ModeCatalogController } from "./ModeCatalogController";
 import { App } from "./App";
 import { Editor } from "./Editor";
+import { ErrorWindow } from "./ErrorWindow";
 
 export class Database {
     static oDatabase = {
@@ -110,30 +111,38 @@ export class Database {
 
     static fnInitGit()
     {
+        _s('Database.fnInitGit')
         Database.octokit = new Octokit({
             auth: Database.sAPIKey,
-        });        
+        });
     }
 
     // ===============================================================
 
     static fnFirstLoadDatabase()
     {
+        _s('Database.fnFirstLoadDatabase')
         return Database
             .fnGetSHADatabase()
             .then(() => {
+                _s('Database.fnFirstLoadDatabase.then')
                 ModeController.fnChangeMode(MODE_CATALOG)
                 App.fnUpdate();
                 Database.fnUpdateNoteDatabase();
             })
             .catch((sAnsw) => {
+                _s('Database.fnFirstLoadDatabase.catch')
+                
+
                 if (/Not Found/.test(sAnsw)) {
                     // if (confirm('База не найдена. Создать базу в репозиториии?')) {
                     Database.bDirty = true;
                     Database.fnUpdateNoteDatabase();
+                    ErrorWindow.fnShow('Внимание', 'База не найдена. И была создана новая.')
                     // }
                 } else {
-                    alert(sAnsw);
+                    ErrorWindow.fnShow('Ошибка', sAnsw)
+                    // alert(sAnsw);
                 }
             })        
     }
@@ -151,6 +160,8 @@ export class Database {
                 }).then(({ data }) => {
                     Database.SHA = data.sha
                     fnResolv(Database.SHA)
+                }).catch((e) => {
+                    fnReject(e)
                 })
             }
         })

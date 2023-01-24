@@ -1,7 +1,7 @@
 import $ from "jquery";
 
 import { Database } from "./Database"
-import bootstrap from 'bootstrap'
+import * as bootstrap from 'bootstrap'
 
 export class APIDataWindow {
     // NOTE: методоты для работы dom

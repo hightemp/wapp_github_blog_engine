@@ -1,3 +1,8 @@
+import $ from "jquery";
+
+import { Database } from "./Database"
+import { ModeCatalogController } from "./ModeCatalogController"
+import { Render } from "./Render"
 
 export class ModeFavoritesController {
     static get $oFavoritesList() { return $(".favorites-panel .list") }
@@ -17,7 +22,7 @@ export class ModeFavoritesController {
                 var sID = oDiv.data("id")
                 if (sID) {
                     console.log("sArticleID", sID)
-                    App.fnChangeArticle(sID)
+                    ModeCatalogController.fnChangeArticle(sID)
                 }
             }
         })
@@ -29,7 +34,7 @@ export class ModeFavoritesController {
     {
         var aR = (Database.oDatabase.favorites || [])
         aR = aR.map((oFI) => Database.oDatabase.articles.filter((oAI) => oAI.id == oFI.article_id)[0])
-        var sHTML = App.fnRenderList(aR, App.sArticleID)
-        App.$oFavoritesList.html(sHTML)
+        var sHTML = Render.fnRenderList(aR, ModeCatalogController.sArticleID)
+        ModeFavoritesController.$oFavoritesList.html(sHTML)
     }
 }

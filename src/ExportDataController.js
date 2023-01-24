@@ -1,3 +1,6 @@
+import $ from "jquery";
+import { Database } from "./Database";
+
 export class ExportDataController {
     static get $oExportBtn() { return $("#app-export-btn") }
 

@@ -1,5 +1,11 @@
+import $ from "jquery";
+import Quill from 'quill'
+import 'quill/dist/quill.snow.css'
+import { Database } from "./Database";
 
-class Editor {
+import { ModeCatalogController } from "./ModeCatalogController"
+
+export class Editor {
 
     static oEditor = null
 
@@ -28,9 +34,16 @@ class Editor {
 
     // ===============================================================
 
+    static fnRender()
+    {
+        Editor.fnRenderHTMLEditor()
+    }
+
+    // ===============================================================
+
     static fnRenderHTMLEditor()
     {
-        App.oEditor = new Quill('#page-edit', {
+        Editor.oEditor = new Quill('#page-edit', {
             modules: {toolbar: true},
             theme: 'snow',
         });
@@ -40,13 +53,13 @@ class Editor {
 
     static fnPrepareEditorContents()
     {
-        var sHTML = App.fnGetEditorContent()
-        Database.fnUpdateRecord("articles", App.sArticleID, { html: sHTML })
+        var sHTML = Editor.fnGetEditorContent()
+        Database.fnUpdateRecord("articles", ModeCatalogController.sArticleID, { html: sHTML })
     }
 
     static fnSaveEditorContents()
     {
-        App.fnPrepareEditorContents()
+        Editor.fnPrepareEditorContents()
         Database.fnWriteNotesDatabase()
     }
 
@@ -61,24 +74,24 @@ class Editor {
         var editor = document.getElementsByClassName('ql-editor')
         console.log(sHTML)
         editor[0].innerHTML = sHTML
-        App.bDirty = true;
+        Database.bDirty = true;
     }
 
     // ===============================================================
 
     static fnUpdateEditor()
     {
-        if (!App.sArticleID) {
-            App.$oPagePanel.addClass('hidden')
-            App.fnSetEditorContent('')
+        if (!ModeCatalogController.sArticleID) {
+            Editor.$oPagePanel.addClass('hidden')
+            Editor.fnSetEditorContent('')
         } else {
-            App.$oPagePanel.removeClass('hidden')
-            var aR = App.fnFilterArticlesByID(App.sArticleID);
+            Editor.$oPagePanel.removeClass('hidden')
+            var aR = Database.fnFilterArticlesByID(ModeCatalogController.sArticleID);
             if (aR.length) {
-                App.fnSetEditorContent(aR[0].html)
+                Editor.fnSetEditorContent(aR[0].html)
             } else {
-                App.$oPagePanel.addClass('hidden')
-                App.fnSetEditorContent('')
+                Editor.$oPagePanel.addClass('hidden')
+                Editor.fnSetEditorContent('')
             }
         }
     }

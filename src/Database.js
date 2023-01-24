@@ -1,6 +1,12 @@
-import { Octokit } from "@octokit/rest";
+import $ from "jquery";
 
-import { MODE_CATALOG, ModeController } from 'ModeController'
+import { Octokit } from "@octokit/rest";
+import { encode, decode } from 'js-base64';
+
+import { MODE_CATALOG, ModeController } from './ModeController'
+import { ModeCatalogController } from "./ModeCatalogController";
+import { App } from "./App";
+import { Editor } from "./Editor";
 
 export class Database {
     static oDatabase = {
@@ -50,6 +56,7 @@ export class Database {
     static DATABASE_UPDATE_TIMEOUT = 30000
 
     static SHA = ""
+    static sFilePath = ''
     
     // NOTE: Базовые объекты
     /** @var Octokit octokit */
@@ -59,6 +66,8 @@ export class Database {
     static sLogin = ''
     static sRepo = ''
     static sAPIKey = ''
+
+    // ===============================================================
 
     // NOTE: Database методы
     static fnGetByID(sTable, sRecordID)
@@ -90,6 +99,22 @@ export class Database {
         return sLastID
     }
 
+    static fnUpdateFilename(sArticleID)
+    {
+        var aArticles = Database.fnFilterArticlesByID(sArticleID)
+        if (aArticles.length) {
+            var sID = aArticles[0].id
+            Database.sFilePath = Database.fnGetArticlePath(sID)
+        }
+    }
+
+    static fnInitGit()
+    {
+        Database.octokit = new Octokit({
+            auth: Database.sAPIKey,
+        });        
+    }
+
     // ===============================================================
 
     static fnFirstLoadDatabase()
@@ -99,13 +124,13 @@ export class Database {
             .then(() => {
                 ModeController.fnChangeMode(MODE_CATALOG)
                 App.fnUpdate();
-                App.fnUpdateNoteDatabase();
+                Database.fnUpdateNoteDatabase();
             })
             .catch((sAnsw) => {
                 if (/Not Found/.test(sAnsw)) {
                     // if (confirm('База не найдена. Создать базу в репозиториии?')) {
-                    App.bDirty = true;
-                    App.fnUpdateNoteDatabase();
+                    Database.bDirty = true;
+                    Database.fnUpdateNoteDatabase();
                     // }
                 } else {
                     alert(sAnsw);
@@ -117,15 +142,18 @@ export class Database {
 
     static fnGetSHADatabase()
     {
-        if (!Database.SHA) {
-            Database.octokit.rest.repos.getContent({
-                owner: Database.sLogin,
-                repo: Database.sRepo,
-                path: Database.DATABASE_PATH,
-            }).then(({ data }) => {
-                Database.SHA = data.sha
-            })
-        }
+        return new Promise((fnResolv, fnReject) => {
+            if (!Database.SHA) {
+                Database.octokit.rest.repos.getContent({
+                    owner: Database.sLogin,
+                    repo: Database.sRepo,
+                    path: Database.DATABASE_PATH,
+                }).then(({ data }) => {
+                    Database.SHA = data.sha
+                    fnResolv(Database.SHA)
+                })
+            }
+        })
     }
 
     static fnGetNotesDatabase()
@@ -154,7 +182,7 @@ export class Database {
             repo: Database.sRepo,
             path: Database.DATABASE_PATH,
             sha: Database.SHA,
-            message: fnGetUpdateMessage(),
+            message: Database.fnGetUpdateMessage(),
             content: encode(sData)
         }).then(() => {
             App.fnShowSavingToast()
@@ -167,11 +195,30 @@ export class Database {
     static fnUpdateNoteDatabase()
     {
         if (Database.bDirty) {
-            App.fnPrepareEditorContents()
+            Editor.fnPrepareEditorContents()
             Database.fnWriteNotesDatabase()
         }
         Database.fnGetSHADatabase()
         setTimeout(Database.fnUpdateNoteDatabase, Database.DATABASE_UPDATE_TIMEOUT);
+    }
+
+    // ===============================================================
+
+    static fnParseAPIInfo()
+    {
+        // bootstrap его использует
+        var aHash, sHash;
+
+        try {
+            sHash = location.hash.split('#')[1]
+            aHash = sHash.split(':')
+        } catch (_) {
+            aHash = ['', '', '']
+        }
+
+        Database.sLogin = aHash[0]
+        Database.sRepo = aHash[1]
+        Database.sAPIKey = aHash[2]
     }
 
     // ===============================================================
@@ -186,11 +233,15 @@ export class Database {
         return `blob/main/articles/${iID}.md`
     }
 
+    static fnGetUpdateMessage() {
+        return "update: "+(new Date())
+    }
+
     // ===============================================================
 
     static fnGetCurrentArticle()
     {
-        return Database.oDatabase.articles.find((oI) => oI.id==App.sArticleID)
+        return Database.oDatabase.articles.find((oI) => oI.id==ModeCatalogController.sArticleID)
     }
 
     static fnFilterCategoriesByGroup(iGroupID)

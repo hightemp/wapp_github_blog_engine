@@ -1,5 +1,13 @@
+import $ from "jquery";
+
+import { ArticlesController } from "./ArticlesController"
+import { Database } from "./Database"
+import { ModeCatalogController } from "./ModeCatalogController"
+import { Render } from "./Render";
 
 export class ModeTagsController {
+    static oArticlesTagsList = null
+
     static get $oTagsList() { return $(".tags-panel .list") }
     static get $oTagsArticlesList() { return $(".tags-articles-panel .list") }
 
@@ -13,7 +21,7 @@ export class ModeTagsController {
                 var sID = oDiv.data("id")
                 if (sID) {
                     console.log("sTagID", sID)
-                    App.fnChangeTag(sID)
+                    ModeTagsController.fnChangeTag(sID)
                 }
             }
             if ($(oEvent.target).parents(".tags-articles-panel").length) {
@@ -21,7 +29,7 @@ export class ModeTagsController {
                 var sID = oDiv.data("id")
                 if (sID) {
                     console.log("sArticleID", sID)
-                    App.fnChangeArticle(sID)
+                    ModeTagsController.fnChangeArticle(sID)
                 }
             }
         })
@@ -31,9 +39,9 @@ export class ModeTagsController {
 
     static fnChangeTag(sTagID)
     {
-        App.sTagID = sTagID
-        App.fnUpdateTags()
-        App.fnUpdateTagsArticles()
+        ModeCatalogController.sTagID = sTagID
+        ModeTagsController.fnUpdateTags()
+        ModeTagsController.fnUpdateTagsArticles()
     }
 
     // ===============================================================
@@ -41,32 +49,31 @@ export class ModeTagsController {
     static fnUpdateTags()
     {
         var aR = (Database.oDatabase.tags || [])
-        var sHTML = App.fnRenderList(aR, App.sTagID)
-        App.$oTagsList.html(sHTML)
+        var sHTML = Render.fnRenderList(aR, ModeCatalogController.sTagID)
+        ModeTagsController.$oTagsList.html(sHTML)
     }
 
     static fnUpdateTagsArticles()
     {
         var aR = (Database.oDatabase.tags_relations || [])
-        aR = aR.filter((oI) => oI.tag_id == App.sTagID )
+        aR = aR.filter((oI) => oI.tag_id == ModeCatalogController.sTagID )
         aR = aR.map((oFI) => Database.oDatabase.articles.filter((oAI) => oAI.id == oFI.article_id)[0])
-        var sHTML = App.fnRenderList(aR, App.sArticleID)
-        App.$oTagsArticlesList.html(sHTML)
+        var sHTML = Render.fnRenderList(aR, ModeCatalogController.sArticleID)
+        ModeTagsController.$oTagsArticlesList.html(sHTML)
     }
 
     static fnUpdateArticlesTagsList(bEmptyForm)
     {
         var sHTML = ``
-        sHTML = App.fnRenderOptionsList(Database.oDatabase.tags)
-        App.$oArticleTagsBox1Select.html(sHTML)
-        var aTags = Database.oDatabase.tags_relations.filter((oI) => oI.article_id == App.sArticleID)
+        sHTML = Render.fnRenderOptionsList(Database.oDatabase.tags)
+        ArticlesController.$oArticleTagsBox1Select.html(sHTML)
+        var aTags = Database.oDatabase.tags_relations.filter((oI) => oI.article_id == ModeCatalogController.sArticleID)
         aTags = aTags.map((oI) => Database.oDatabase.tags.filter((oTI) => oTI.id == oI.tag_id)[0])
         if (bEmptyForm) {
             sHTML = ''
         } else {
-            sHTML = App.fnRenderOptionsList(aTags)
+            sHTML = Render.fnRenderOptionsList(aTags)
         }
-        App.$oArticleTagsBox2Select.html(sHTML)
-
+        ArticlesController.$oArticleTagsBox2Select.html(sHTML)
     }
 }

@@ -1,5 +1,11 @@
+import $ from "jquery";
+import { App } from "./App";
+import { Database } from "./Database";
 
-class ArticlesController {
+import { ModeCatalogController } from "./ModeCatalogController"
+import { Render } from "./Render"
+
+export class ArticlesController {
     // NOTE: Окно сохранения
     static oModelEditArticle = null
 
@@ -22,31 +28,36 @@ class ArticlesController {
 
     static fnBind()
     {
-        App.$oArticleMoveAllTags2to1Btn.click(() => {
-            var aBox2Tags = App.fnGetArticleBox2TagsList()
+        ArticlesController.$oArticleEditSave.click(() => {
+            ArticlesController.fnSaveArticle()
+            ArticlesController.oModelEditArticle.hide()
+        })
+
+        ArticlesController.$oArticleMoveAllTags2to1Btn.click(() => {
+            var aBox2Tags = ArticlesController.fnGetArticleBox2TagsList()
             aBox2Tags = []
-            App.fnRenderBox2List(aBox2Tags)
+            ArticlesController.fnRenderBox2List(aBox2Tags)
         })
-        App.$oArticleMoveTags2to1Btn.click(() => {
-            var aBox1Tags = App.fnGetArticleBox1TagsList()
-            var aAllBox2Tags = App.fnGetArticleBox2TagsList()
-            var aBox2Tags = App.fnGetArticleBox2TagsList(true)
+        ArticlesController.$oArticleMoveTags2to1Btn.click(() => {
+            var aBox1Tags = ArticlesController.fnGetArticleBox1TagsList()
+            var aAllBox2Tags = ArticlesController.fnGetArticleBox2TagsList()
+            var aBox2Tags = ArticlesController.fnGetArticleBox2TagsList(true)
             aBox2Tags = aAllBox2Tags.filter((oI, iN, aA) => !~aBox2Tags.findIndex((oAI) => oAI.id == oI.id))
-            App.fnRenderBox2List(aBox2Tags)
+            ArticlesController.fnRenderBox2List(aBox2Tags)
         })
-        App.$oArticleMoveAllTags1to2Btn.click(() => {
-            var aBox1Tags = App.fnGetArticleBox1TagsList()
-            var aBox2Tags = App.fnGetArticleBox2TagsList()
+        ArticlesController.$oArticleMoveAllTags1to2Btn.click(() => {
+            var aBox1Tags = ArticlesController.fnGetArticleBox1TagsList()
+            var aBox2Tags = ArticlesController.fnGetArticleBox2TagsList()
             aBox2Tags = aBox2Tags.concat(aBox1Tags)
             aBox2Tags = aBox2Tags.filter((oI, iN, aA) => iN==aA.findIndex((oAI) => oAI.id == oI.id))
-            App.fnRenderBox2List(aBox2Tags)
+            ArticlesController.fnRenderBox2List(aBox2Tags)
         })
-        App.$oArticleMoveTags1to2Btn.click(() => {
-            var aBox1Tags = App.fnGetArticleBox1TagsList(true)
-            var aBox2Tags = App.fnGetArticleBox2TagsList()
+        ArticlesController.$oArticleMoveTags1to2Btn.click(() => {
+            var aBox1Tags = ArticlesController.fnGetArticleBox1TagsList(true)
+            var aBox2Tags = ArticlesController.fnGetArticleBox2TagsList()
             aBox2Tags = aBox2Tags.concat(aBox1Tags)
             aBox2Tags = aBox2Tags.filter((oI, iN, aA) => iN==aA.findIndex((oAI) => oAI.id == oI.id))
-            App.fnRenderBox2List(aBox2Tags)
+            ArticlesController.fnRenderBox2List(aBox2Tags)
         })        
     }
 
@@ -55,10 +66,10 @@ class ArticlesController {
     static fnUpdateArticlesName(bEmptyForm)
     {
         if (bEmptyForm) {
-            App.$oArticleModelEditName.val('')
+            ArticlesController.$oArticleModelEditName.val('')
         } else {
-            var oArticle = App.fnGetCurrentArticle()
-            App.$oArticleModelEditName.val(oArticle.name)
+            var oArticle = Database.fnGetCurrentArticle()
+            ArticlesController.$oArticleModelEditName.val(oArticle.name)
         }
     }
 
@@ -72,31 +83,31 @@ class ArticlesController {
             oCF.name = `${aGr[0].name} - ${oCF.name}`
             aR = aR.concat(oCF)
         }
-        sHTML = App.fnRenderOptionsList(aR, App.sCatalogCategoryID)
-        App.$oArticleModelEditCategory.html(sHTML)
+        sHTML = Render.fnRenderOptionsList(aR, ModeCatalogController.sCatalogCategoryID)
+        ArticlesController.$oArticleModelEditCategory.html(sHTML)
     }
 
     static fnUpdateArticlesModel(bEmptyForm=false)
     {
-        App.fnUpdateArticlesName(bEmptyForm)
-        App.fnUpdateArticlesTagsList(bEmptyForm)
-        App.fnUpdateArticlesCategoryList()
+        ArticlesController.fnUpdateArticlesName(bEmptyForm)
+        ArticlesController.fnUpdateArticlesTagsList(bEmptyForm)
+        ArticlesController.fnUpdateArticlesCategoryList()
     }
 
     // ===============================================================
 
     static fnShowArticleEditModal(bEmptyForm=false)
     {
-        App.fnUpdateArticlesModel(bEmptyForm)
-        if (!App.oModelEditArticle) {
-            App.oModelEditArticle = new bootstrap.Modal(App.$oModelEditArticle, {})
+        ArticlesController.fnUpdateArticlesModel(bEmptyForm)
+        if (!ArticlesController.oModelEditArticle) {
+            ArticlesController.oModelEditArticle = new bootstrap.Modal(ArticlesController.$oModelEditArticle, {})
         }
-        App.oModelEditArticle.show()
+        ArticlesController.oModelEditArticle.show()
     }
 
     static fnHideArticleEditModal()
     {
-        App.oModelEditArticle.hide()
+        ArticlesController.oModelEditArticle.hide()
     }
 
     // ===============================================================
@@ -105,9 +116,9 @@ class ArticlesController {
     {
         var aOpts = []
         if (bSelected) {
-            aOpts = $.makeArray(App.$oArticleTagsBox1Select.find("option:selected"))
+            aOpts = $.makeArray(ArticlesController.$oArticleTagsBox1Select.find("option:selected"))
         } else {
-            aOpts = $.makeArray(App.$oArticleTagsBox1Select.find("option"))
+            aOpts = $.makeArray(ArticlesController.$oArticleTagsBox1Select.find("option"))
         }
         aOpts = aOpts.map((oE) => Database.oDatabase.tags.filter((oT) => oT.id == $(oE).attr("value"))[0])
         return JSON.parse(JSON.stringify(aOpts))
@@ -117,9 +128,9 @@ class ArticlesController {
     {
         var aOpts = []
         if (bSelected) {
-            aOpts = $.makeArray(App.$oArticleTagsBox2Select.find("option:selected"))
+            aOpts = $.makeArray(ArticlesController.$oArticleTagsBox2Select.find("option:selected"))
         } else {
-            aOpts = $.makeArray(App.$oArticleTagsBox2Select.find("option"))
+            aOpts = $.makeArray(ArticlesController.$oArticleTagsBox2Select.find("option"))
         }
         aOpts = aOpts.map((oE) => Database.oDatabase.tags.filter((oT) => oT.id == $(oE).attr("value"))[0])
         return JSON.parse(JSON.stringify(aOpts))
@@ -130,15 +141,15 @@ class ArticlesController {
     static fnRenderBox1List(aList)
     {
         var sHTML = ''
-        sHTML = App.fnRenderOptionsList(aList)
-        App.$oArticleTagsBox1Select.html(sHTML)
+        sHTML = ArticlesController.fnRenderOptionsList(aList)
+        ArticlesController.$oArticleTagsBox1Select.html(sHTML)
     }
 
     static fnRenderBox2List(aList)
     {
         var sHTML = ''
-        sHTML = App.fnRenderOptionsList(aList)
-        App.$oArticleTagsBox2Select.html(sHTML)
+        sHTML = ArticlesController.fnRenderOptionsList(aList)
+        ArticlesController.$oArticleTagsBox2Select.html(sHTML)
     }
 
     // ===============================================================
@@ -147,10 +158,30 @@ class ArticlesController {
     {
         var aTagsRel = Database.oDatabase.tags_relations
         // Удаляем старые связи
-        Database.oDatabase.tags_relations = aTagsRel.filter((oI) => oI.article_id != App.sArticleID)
-        var aTags = App.fnGetArticleBox2TagsList()
+        Database.oDatabase.tags_relations = aTagsRel.filter((oI) => oI.article_id != ModeCatalogController.sArticleID)
+        var aTags = ArticlesController.fnGetArticleBox2TagsList()
         for (var oTag of aTags) {
-            Database.fnAddRecord("tags_relations", { "tag_id": oTag.id, "article_id": App.sArticleID })
+            Database.fnAddRecord("tags_relations", { "tag_id": oTag.id, "article_id": ModeCatalogController.sArticleID })
         }
+    }
+
+    // ===============================================================
+
+    static fnSaveArticle()
+    {
+        if (ModeCatalogController.sArticleID == "") {
+            // Если статьи нет, то создаем ее
+            // App.sArticleID = Database.fnAddRecord("articles", {category_id:"",name:"",html:""})
+        }
+        var oObj = {
+            name: ArticlesController.$oArticleModelEditName.val(),
+            category_id: ArticlesController.$oArticleModelEditCategory.val()
+        }
+        console.log("!!!1", oObj, ModeCatalogController.sArticleID)
+        Database.fnUpdateRecord("articles", ModeCatalogController.sArticleID, oObj)
+        ArticlesController.fnSaveCurrentArticleTags()
+        console.log("!!!2", Database.oDatabase)
+        Database.fnWriteNotesDatabase()
+        App.fnUpdate()
     }
 }

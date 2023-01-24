@@ -1,3 +1,8 @@
+import $ from "jquery";
+
+import { Database } from "./Database"
+import { Render } from "./Render"
+import { encode, decode } from 'js-base64';
 
 export class MarkdownPublisher {
     static oDocuments = {}
@@ -6,16 +11,19 @@ export class MarkdownPublisher {
 
     static fnBind() 
     {
-        
+        // NOTE: Опубликовать в виде страниц
+        MarkdownPublisher.$oPublishBtn.on('click', () => {
+            ModeController.fnGeneratePages()
+        })
     }
 
     static fnRenderArticles(iCategoryID, iLevel=1)
     {
-        var aR = App.fnFilterArticlesByCategory(iCategoryID)
+        var aR = Database.fnFilterArticlesByCategory(iCategoryID)
         var aMarkdown = []
 
         for (var oArticle of aR) {
-            aMarkdown.push(` `.repeat(iLevel*2) + `* - [${oArticle.name}](${App.fnGetArticlePathURL(oArticle.id)})`)
+            aMarkdown.push(` `.repeat(iLevel*2) + `* - [${oArticle.name}](${Database.fnGetArticlePathURL(oArticle.id)})`)
         }
 
         return aMarkdown
@@ -30,8 +38,8 @@ export class MarkdownPublisher {
             if (!iParentID) iParentID = null
             if (oCategory.parent_id!=iParentID) continue
             aMarkdown.push(` `.repeat(iLevel*2) + `- ${oCategory.name}`)
-            aMarkdown = aMarkdown.concat(App.fnRenderCategoriesList(aR, oCategory.id, iLevel+1))
-            aMarkdown = aMarkdown.concat(App.fnRenderArticles(oCategory.id, iLevel+1))
+            aMarkdown = aMarkdown.concat(MarkdownPublisher.fnRenderCategoriesList(aR, oCategory.id, iLevel+1))
+            aMarkdown = aMarkdown.concat(MarkdownPublisher.fnRenderArticles(oCategory.id, iLevel+1))
         }
 
         return aMarkdown
@@ -41,8 +49,8 @@ export class MarkdownPublisher {
     {
         var aMarkdown = []
 
-        var aR = App.fnFilterCategoriesByGroup(iGroupID)
-        aMarkdown = App.fnRenderCategoriesList(aR, null, 1)
+        var aR = Database.fnFilterCategoriesByGroup(iGroupID)
+        aMarkdown = Database.fnRenderCategoriesList(aR, null, 1)
 
         return aMarkdown
     }
@@ -53,7 +61,7 @@ export class MarkdownPublisher {
 
         for (var oGroup of Database.oDatabase.groups) {
             aMarkdown.push(`- ${oGroup.name}`)
-            aMarkdown = aMarkdown.concat(App.fnRenderCategories(oGroup.id))
+            aMarkdown = aMarkdown.concat(MarkdownPublisher.fnRenderCategories(oGroup.id))
         }
 
         return aMarkdown
@@ -63,10 +71,10 @@ export class MarkdownPublisher {
     {
         var aMarkdown = [`# Оглавление\n`]
 
-        aMarkdown = aMarkdown.concat(App.fnRenderGroups())
+        aMarkdown = aMarkdown.concat(MarkdownPublisher.fnRenderGroups())
         var sMarkdown = aMarkdown.join(`\n`)
 
-        await App.fnPublishDocument(`index.md`, sMarkdown)
+        await MarkdownPublisher.fnPublishDocument(`index.md`, sMarkdown)
         // console.log()
     }
 
@@ -74,34 +82,34 @@ export class MarkdownPublisher {
     {
         var aR = Database.oDatabase.articles
         for (var oI of aR) {
-            var sP = App.fnGetArticlePath(oI.id)
-            await App.fnPublishDocument(sP, oI.html)
+            var sP = Database.fnGetArticlePath(oI.id)
+            await MarkdownPublisher.fnPublishDocument(sP, oI.html)
         }
     }
 
     static async fnGeneratePages()
     {
-        await App.fnGenerateIndexPage()
-        await App.fnGenerateMarkdownPages()
+        await MarkdownPublisher.fnGenerateIndexPage()
+        await MarkdownPublisher.fnGenerateMarkdownPages()
     }
 
     static async fnPublishDocument(sPath, sContent)
     {
-        if (!App.oDocuments[sPath] || !App.oDocuments[sPath].sha) {
-            await App.octokit.rest.repos.getContent({
-                owner: App.sLogin,
-                repo: App.sRepo,
+        if (!MarkdownPublisher.oDocuments[sPath] || !MarkdownPublisher.oDocuments[sPath].sha) {
+            await Database.octokit.rest.repos.getContent({
+                owner: Database.sLogin,
+                repo: Database.sRepo,
                 path: sPath,
             }).then(({ data }) => {
-                App.oDocuments[sPath] = data
+                MarkdownPublisher.oDocuments[sPath] = data
             }).catch((_) => { })
         }
-        return App.octokit.rest.repos.createOrUpdateFileContents({
-            owner: App.sLogin,
-            repo: App.sRepo,
+        return Database.octokit.rest.repos.createOrUpdateFileContents({
+            owner: Database.sLogin,
+            repo: Database.sRepo,
             path: sPath,
-            sha: App.oDocuments[sPath] ? App.oDocuments[sPath].sha : null,
-            message: fnGetUpdateMessage(),
+            sha: MarkdownPublisher.oDocuments[sPath] ? MarkdownPublisher.oDocuments[sPath].sha : null,
+            message: Database.fnGetUpdateMessage(),
             content: encode(sContent)
         })
     }

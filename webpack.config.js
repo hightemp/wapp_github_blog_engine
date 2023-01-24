@@ -1,4 +1,6 @@
-const path = require('path');
+const path = require('path')
+
+const WebpackBuildNotifierPlugin = require('webpack-build-notifier');
 
 module.exports = {
     entry: './src/index.js',
@@ -29,4 +31,14 @@ module.exports = {
     },
 
     watch: true,
+
+    plugins: [
+        new WebpackBuildNotifierPlugin({
+            title: "My Webpack Project",
+            logo: path.resolve("./favicon.png"),
+            suppressSuccess: true, // don't spam success notifications
+            successSound: "/usr/share/sounds/LinuxMint/stereo/dialog-information.ogg",
+            failureSound: "/usr/share/sounds/LinuxMint/stereo/dialog-error.ogg"
+        })
+    ]
 };

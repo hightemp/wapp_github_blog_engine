@@ -1,3 +1,5 @@
+import $ from "jquery";
+
 export const MODE_CATALOG = "catalog"
 export const MODE_LIST = "list"
 export const MODE_FAVORITES = "favorites"
@@ -46,10 +48,6 @@ export class ModeController {
         })
         ModeController.$oModeLinksBtn.click(() => {
             ModeController.fnChangeMode(MODE_LINKS)
-        })
-        // NOTE: Опубликовать в виде страниц
-        ModeController.$oPublishBtn.click(() => {
-            ModeController.fnGeneratePages()
         })
     }
 

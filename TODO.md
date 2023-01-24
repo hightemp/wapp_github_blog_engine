@@ -1,0 +1,17 @@
+
+- [ ] Исправление после рефакторинга
+    - [ ] App.js                 
+    - [ ] APIDataWindow.js       
+    - [ ] ExportDataController.js  
+    - [ ] ModeController.js           
+    - [ ] ModeListController.js
+    - [ ] Database.js                    
+    - [ ] ImportDataController.js  
+    - [ ] MarkdownPublisher.js                 
+    - [ ] ModeFavoritesController.js  
+    - [ ] ModeTagsController.js
+    - [ ] ArticlesController.js  
+    - [ ] Editor.js                      
+    - [ ] ModeCatalogController.js             
+    - [ ] ModeLinksController.js      
+    - [ ] Render.js

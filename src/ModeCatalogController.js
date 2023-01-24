@@ -1,3 +1,8 @@
+import $ from "jquery";
+import { App } from "./App";
+
+import { Database } from "./Database"
+import { Render } from "./Render"
 
 export class ModeCatalogController {
 
@@ -7,6 +12,11 @@ export class ModeCatalogController {
     static sTagID = ""
 
     // ===============================================================
+    static get $oModeCatalog() { return $("#mode-catalog") }
+
+    static get $oModeCatalogGroupItems() { return ModeCatalogController.$oModeCatalog.find(".groups-panel .item-title") }
+    static get $oModeCatalogCategoryItems() { return ModeCatalogController.$oModeCatalog.find(".categories-panel .item-title") }
+    static get $oModeCatalogArticleItems() { return ModeCatalogController.$oModeCatalog.find(".articles-panel .item-title") }
 
     static get $oCatalogGroupsList() { return $(".groups-panel .list") }
     static get $oCatalogCategoriesList() { return $(".categories-panel .list") }
@@ -41,7 +51,7 @@ export class ModeCatalogController {
                 var sID = oDiv.data("id")
                 if (sID) {
                     console.log("sArticleID", sID)
-                    App.fnChangeArticle(sID)
+                    ModeCatalogController.fnChangeArticle(sID)
                 }
             }
             // App.$oCatalogCategoriesPanel
@@ -54,14 +64,14 @@ export class ModeCatalogController {
                     if (sID) { 
                         Database.fnUpdateRecord("categories", sID, { is_opened: !sOpened })
                         console.log(Database.oDatabase)
-                        App.fnUpdateCatalogCategories()
+                        ModeCatalogController.fnUpdateCatalogCategories()
                     }
                 } else {
                     var oDiv = $($(oEvent.target).parents(".input-group")[0])
                     var sID = oDiv.data("id")
                     if (sID) {
                         console.log("sCategoryID", sID)
-                        App.fnChangeCatalogCategory(sID)
+                        ModeCatalogController.fnChangeCatalogCategory(sID)
                     }
                 }
             }
@@ -71,7 +81,7 @@ export class ModeCatalogController {
                 var sID = oDiv.data("id")
                 if (sID) {
                     console.log("sGroupID", sID)
-                    App.fnChangeCatalogGroup(sID)
+                    ModeCatalogController.fnChangeCatalogGroup(sID)
                 }
             }
         })
@@ -203,35 +213,35 @@ export class ModeCatalogController {
     static fnUpdateCatalogGroups()
     {
         var aR = Database.oDatabase.groups
-        var sHTML = App.fnRenderList(aR, App.sCatalogGroupID)
-        App.$oCatalogGroupsList.html(sHTML)
+        var sHTML = Render.fnRenderList(aR, ModeCatalogController.sCatalogGroupID)
+        ModeCatalogController.$oCatalogGroupsList.html(sHTML)
     }
 
     static fnUpdateCatalogCategories()
     {
         var aR = []
-        if (App.sCatalogGroupID) {
-            App.$oCatalogCategoriesPanel.removeClass("hidden")
+        if (ModeCatalogController.sCatalogGroupID) {
+            ModeCatalogController.$oCatalogCategoriesPanel.removeClass("hidden")
             var sHTML = ""
-            aR = App.fnFilterCategoriesByGroup(App.sCatalogGroupID);
-            console.log("fnUpdateCatalogCategories", App.sCatalogGroupID, aR)
-            sHTML = App.fnRenderTree(aR, App.sCatalogCategoryID)
-            App.$oCatalogCategoriesList.html(sHTML)
+            aR = Database.fnFilterCategoriesByGroup(ModeCatalogController.sCatalogGroupID);
+            console.log("fnUpdateCatalogCategories", ModeCatalogController.sCatalogGroupID, aR)
+            sHTML = Render.fnRenderTree(aR, ModeCatalogController.sCatalogCategoryID)
+            ModeCatalogController.$oCatalogCategoriesList.html(sHTML)
         } else {
-            App.$oCatalogCategoriesPanel.addClass("hidden")
+            ModeCatalogController.$oCatalogCategoriesPanel.addClass("hidden")
         }
         
     }
 
     static fnUpdateCatalogArticles()
     {
-        if (App.sCatalogCategoryID) {
-            App.$oCatalogArticlesPanel.removeClass("hidden")
-            var aR = App.fnFilterArticlesByCategory(App.sCatalogCategoryID)
-            var sHTML = App.fnRenderList(aR, App.sArticleID)
-            App.$oCatalogArticlesList.html(sHTML)
+        if (ModeCatalogController.sCatalogCategoryID) {
+            ModeCatalogController.$oCatalogArticlesPanel.removeClass("hidden")
+            var aR = Database.fnFilterArticlesByCategory(ModeCatalogController.sCatalogCategoryID)
+            var sHTML = Render.fnRenderList(aR, ModeCatalogController.sArticleID)
+            ModeCatalogController.$oCatalogArticlesList.html(sHTML)
         } else {
-            App.$oCatalogArticlesPanel.addClass("hidden")
+            ModeCatalogController.$oCatalogArticlesPanel.addClass("hidden")
         }
     }
 
@@ -239,48 +249,24 @@ export class ModeCatalogController {
 
     static fnChangeCatalogGroup(sGroupID)
     {
-        App.sCatalogGroupID = sGroupID
-        App.sCatalogCategoryID = ""
-        App.sArticleID = ""
+        ModeCatalogController.sCatalogGroupID = sGroupID
+        ModeCatalogController.sCatalogCategoryID = ""
+        ModeCatalogController.sArticleID = ""
         App.fnUpdate()
     }
 
     static fnChangeCatalogCategory(sCategoryID)
     {
-        App.sCatalogCategoryID = sCategoryID
-        App.sArticleID = ""
+        ModeCatalogController.sCatalogCategoryID = sCategoryID
+        ModeCatalogController.sArticleID = ""
         App.fnUpdate()
     }
 
     static fnChangeArticle(sArticleID)
     {
         console.error(['fnChangeArticle', arguments])
-        App.sArticleID = sArticleID
-        var aArticles = App.fnFilterArticlesByID(sArticleID)
-        if (aArticles.length) {
-            var sID = aArticles[0].id
-            App.sFilePath = App.fnGetArticlePath(sID)
-        }
-        App.fnUpdate()
-    }
-
-    // ===============================================================
-
-    static fnSaveArticle()
-    {
-        if (App.sArticleID == "") {
-            // Если статьи нет, то создаем ее
-            // App.sArticleID = Database.fnAddRecord("articles", {category_id:"",name:"",html:""})
-        }
-        var oObj = {
-            name: App.$oArticleModelEditName.val(),
-            category_id: App.$oArticleModelEditCategory.val()
-        }
-        console.log("!!!1", oObj, App, App.sArticleID)
-        Database.fnUpdateRecord("articles", App.sArticleID, oObj)
-        App.fnSaveCurrentArticleTags()
-        console.log("!!!2", Database.oDatabase)
-        Database.fnWriteNotesDatabase()
+        ModeCatalogController.sArticleID = sArticleID
+        Database.fnUpdateFilename(sArticleID)
         App.fnUpdate()
     }
 }

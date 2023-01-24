@@ -1,5 +1,8 @@
 
-class Render {
+import $ from "jquery";
+import { App } from "./App";
+
+export class Render {
     static fnRenderTree(aR, sSelID="", iParentID=null, iLevel=0)
     {
         var sHTML = ``
@@ -30,7 +33,7 @@ class Render {
                     <a class="item-flag">${sItemStatus}</a>
                 </div>
                 <a 
-                    class="list-group-item list-group-item-action item-title ${oI.id == App.sSelCategory ? 'active' : ''}"
+                    class="list-group-item list-group-item-action item-title ${oI.id == sSelID ? 'active' : ''}"
                     data-id="${oI.id}"
                 >
                     ${sSpacer}<div>${oI.name}</div>
@@ -39,7 +42,7 @@ class Render {
             `
 
             if (oI.is_opened) {
-                sHTML += App.fnRenderTree(aR, sSelID, oI.id, iLevel+1)
+                sHTML += Render.fnRenderTree(aR, sSelID, oI.id, iLevel+1)
             }
         }
 
@@ -53,6 +56,34 @@ class Render {
             var sSelected = sSelID == oItem.id ? 'selected' : ''
             sHTML += `<option value="${oItem.id}" ${sSelected}>${oItem.name}</option>`
         }
+        return sHTML
+    }
+
+    static fnRenderList(aR, sSelID="", fnHook=()=>{})
+    {
+        var sHTML = ``
+        console.log("fnRenderList", sSelID)
+
+        for (var oI of aR) {
+            if (!oI) continue;
+            var sSelClass = sSelID == oI.id ? "active" : ""
+            var sHTMLHook = (fnHook(oI) || "")
+            sHTML += `
+            <div class="input-group item-row ${sSelClass}" data-id="${oI.id}">
+                <div class="input-group-text">
+                    <input class="form-check-input mt-0 cb-groups" type="checkbox" value="${oI.id}" id="group-${oI.id}" />
+                </div>
+                ${sHTMLHook}
+                <a 
+                    class="list-group-item list-group-item-action item-title ${oI.id == sSelID ? 'active' : ''}" 
+                    data-id="${oI.id}"
+                >
+                    <div class="item-inner-title">${oI.name}</div>
+                </a>
+            </div>
+            `
+        }
+
         return sHTML
     }
 }

@@ -1,3 +1,9 @@
+import $ from "jquery";
+
+import { ArticlesController } from "./ArticlesController"
+import { Database } from "./Database";
+import { ModeCatalogController } from "./ModeCatalogController"
+import { Render } from "./Render"
 
 export class ModeListController {
     static get $oAllArticlesList() { return $(".all-articles-panel .list") }
@@ -17,37 +23,33 @@ export class ModeListController {
                 var sID = oDiv.data("id")
                 if (sID) {
                     console.log("sArticleID", sID)
-                    App.fnChangeArticle(sID)
+                    ModeCatalogController.fnChangeArticle(sID)
                 }
             }
         })
 
-        App.$oAllArticlesReload.click(() => {
-            App.fnUpdateAllArticles()
+        ModeListController.$oAllArticlesReload.click(() => {
+            ModeListController.fnUpdateAllArticles()
         })
-        App.$oAllArticlesReload.click(() => {
-            App.fnUpdateAllArticles()
-        })
-
-        App.$oArticleEditSave.click(() => {
-            App.fnSaveArticle()
-            App.oModelEditArticle.hide()
+        ModeListController.$oAllArticlesReload.click(() => {
+            ModeListController.fnUpdateAllArticles()
         })
 
-        App.$oAllArticlesReload.click(() => {
-            App.fnUpdateAllArticles()
+
+        ModeListController.$oAllArticlesReload.click(() => {
+            ModeListController.fnUpdateAllArticles()
         })
-        App.$oAllArticlesCreate.click(() => {
-            App.fnShowArticleEditModal(true)
+        ModeListController.$oAllArticlesCreate.click(() => {
+            ArticlesController.fnShowArticleEditModal(true)
         })
-        App.$oAllArticlesEdit.click(() => {
-            var oArticle = Database.fnGetByID("articles", App.sArticleID)
+        ModeListController.$oAllArticlesEdit.click(() => {
+            var oArticle = Database.fnGetByID("articles", ModeCatalogController.sArticleID)
             if (oArticle) {
-                App.fnShowArticleEditModal(false)
+                ArticlesController.fnShowArticleEditModal(false)
             }
         })
-        App.$oAllArticlesRemove.click(() => {
-            App.fnRemoveCatalogArticle(App.sArticleID)
+        ModeListController.$oAllArticlesRemove.click(() => {
+            ModeCatalogController.fnRemoveCatalogArticle(ModeCatalogController.sArticleID)
         })
 
     }
@@ -58,37 +60,7 @@ export class ModeListController {
     {
         console.log('fnUpdateAllArticles')
         var aR = Database.oDatabase.articles
-        var sHTML = App.fnRenderList(aR, App.sArticleID)
-        App.$oAllArticlesList.html(sHTML)
-    }
-
-    // ===============================================================
-
-    static fnRenderList(aR, sSelID="", fnHook=()=>{})
-    {
-        var sHTML = ``
-        console.log("fnRenderList", sSelID)
-
-        for (var oI of aR) {
-            if (!oI) continue;
-            var sSelClass = sSelID == oI.id ? "active" : ""
-            var sHTMLHook = (fnHook(oI) || "")
-            sHTML += `
-            <div class="input-group item-row ${sSelClass}" data-id="${oI.id}">
-                <div class="input-group-text">
-                    <input class="form-check-input mt-0 cb-groups" type="checkbox" value="${oI.id}" id="group-${oI.id}" />
-                </div>
-                ${sHTMLHook}
-                <a 
-                    class="list-group-item list-group-item-action item-title ${oI.id == App.sSelGroup ? 'active' : ''}" 
-                    data-id="${oI.id}"
-                >
-                    <div class="item-inner-title">${oI.name}</div>
-                </a>
-            </div>
-            `
-        }
-
-        return sHTML
+        var sHTML = Render.fnRenderList(aR, ModeCatalogController.sArticleID)
+        ModeListController.$oAllArticlesList.html(sHTML)
     }
 }

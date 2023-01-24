@@ -1,5 +1,6 @@
-import { Database } from 'Database'
+import { Database } from './Database'
 import { APIDataWindow } from './APIDataWindow'
+import { Editor } from './Editor'
 import { ExportDataController } from './ExportDataController'
 import { MarkdownPublisher } from './MarkdownPublisher'
 import { ModeCatalogController } from './ModeCatalogController'
@@ -7,16 +8,11 @@ import { ModeFavoritesController } from './ModeFavoritesController'
 import { ModeListController } from './ModeListController'
 import { ModeTagsController } from './ModeTagsController'
 
+import { Octokit } from "@octokit/rest";
+import { ModeController } from './ModeController'
+import { ArticlesController } from './ArticlesController'
+
 export class App {
-    // NOTE: Переменные
-    static oArticlesTagsList = null
-
-    static sFilePath = ''
-
-    static get $oModeCatalogGroupItems() { return App.$oModeCatalog.find(".groups-panel .item-title") }
-    static get $oModeCatalogCategoryItems() { return App.$oModeCatalog.find(".categories-panel .item-title") }
-    static get $oModeCatalogArticleItems() { return App.$oModeCatalog.find(".articles-panel .item-title") }
-
     static fnShowSavingToast()
     {
         const toastLiveExample = document.getElementById('liveToast')
@@ -26,13 +22,13 @@ export class App {
 
     static fnUpdate()
     {
-        App.fnUpdateCatalogGroups()
-        App.fnUpdateCatalogCategories()
-        App.fnUpdateCatalogArticles()
-        App.fnUpdateEditor()
-        App.fnUpdateAllArticles()
-        App.fnUpdateFavorites()
-        App.fnUpdateTags()
+        ModeCatalogController.fnUpdateCatalogGroups()
+        ModeCatalogController.fnUpdateCatalogCategories()
+        ModeCatalogController.fnUpdateCatalogArticles()
+        Editor.fnUpdateEditor()
+        ModeListController.fnUpdateAllArticles()
+        ModeFavoritesController.fnUpdateFavorites()
+        ModeTagsController.fnUpdateTags()
     }
 
     static fnBind()
@@ -45,38 +41,22 @@ export class App {
         ModeTagsController.fnBind()
         MarkdownPublisher.fnBind()
         ExportDataController.fnBind()
-    }
-
-    static fnParseAPIInfo()
-    {
-        // bootstrap его использует
-        var aHash, sHash;
-
-        try {
-            sHash = location.hash.split('#')[1]
-            aHash = sHash.split(':')
-        } catch (_) {
-            aHash = ['', '', '']
-        }
-
-        App.sLogin = aHash[0]
-        App.sRepo = aHash[1]
-        App.sAPIKey = aHash[2]
+        ArticlesController.fnBind()
+        ModeController.fnBind()
+        Editor.fnBind()
     }
 
     static fnStartApp()
     {
-        App.fnRenderHTMLEditor()
-        App.fnParseAPIInfo()
+        Editor.fnRender()
+        Database.fnParseAPIInfo()
 
         if (!Database.sLogin || !Database.sRepo || !Database.sAPIKey) {
-            return App.$oModalAskApiKey.show()
+            return APIDataWindow.fnShow()
         }
-        App.octokit = new Octokit({
-            auth: Database.sAPIKey,
-        });
-
-        App.$oBlockOverlay.hide()
+        Database.fnInitGit()
+        APIDataWindow.fnHideOverlay()
+        
         // NOTE: Загрузка из БД из репо
         Database.fnFirstLoadDatabase()
     }

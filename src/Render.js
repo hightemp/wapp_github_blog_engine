@@ -49,7 +49,7 @@ export class Render {
         return sHTML;
     }
 
-    static fnRenderOptionsList(aList, sSelID)
+    static fnRenderOptionsList(aList, sSelID='')
     {
         var sHTML = ``
         for (var oItem of aList) {

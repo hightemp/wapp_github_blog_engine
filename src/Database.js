@@ -275,6 +275,11 @@ export class Database {
 
     // ===============================================================
 
+    static fnGetCurrentCategory()
+    {
+        return Database.oDatabase.categories.find((oI) => oI.id==ModeCatalogController.sCatalogCategoryID)
+    }
+
     static fnGetCurrentArticle()
     {
         return Database.oDatabase.articles.find((oI) => oI.id==ModeCatalogController.sArticleID)

@@ -1,5 +1,6 @@
 import $ from "jquery";
 import { App } from "./App";
+import { CategoryEditWindow } from "./CategoryEditWindow";
 
 import { Database } from "./Database"
 import { Render } from "./Render"
@@ -131,16 +132,17 @@ export class ModeCatalogController {
             }
         })
         ModeCatalogController.$oCatalogCategoryCreate.on('click', () => {
-            var sName = prompt("Категория")
-            if (sName) {
-                Database.fnAddRecord("categories", {
-                    "group_id": ModeCatalogController.sCatalogGroupID,
-                    "name": sName,
-                    "html": ""
-                })
-                App.fnUpdate()
-                Database.fnWriteNotesDatabase()
-            }
+            CategoryEditWindow.fnShowModal(true)
+            // var sName = prompt("Категория")
+            // if (sName) {
+            //     Database.fnAddRecord("categories", {
+            //         "group_id": ModeCatalogController.sCatalogGroupID,
+            //         "name": sName,
+            //         "html": ""
+            //     })
+            //     App.fnUpdate()
+            //     Database.fnWriteNotesDatabase()
+            // }
         })
         ModeCatalogController.$oCatalogArticleCreate.on('click', () => {
             ArticlesController.fnShowArticleEditModal(true)
@@ -157,15 +159,16 @@ export class ModeCatalogController {
             }
         })
         ModeCatalogController.$oCatalogCategoryEdit.on('click', () => {
-            var oCategory = Database.fnGetByID("categories", ModeCatalogController.sCatalogCategoryID)
-            if (oCategory) {
-                var sName = prompt("Категория", oCategory.name)
-                if (sName) {
-                    Database.fnUpdateRecord("categories", oCategory.id, {"name": sName})
-                    App.fnUpdate()
-                    Database.fnWriteNotesDatabase()
-                }
-            }
+            CategoryEditWindow.fnShowModal()
+            // var oCategory = Database.fnGetByID("categories", ModeCatalogController.sCatalogCategoryID)
+            // if (oCategory) {
+            //     var sName = prompt("Категория", oCategory.name)
+            //     if (sName) {
+            //         Database.fnUpdateRecord("categories", oCategory.id, {"name": sName})
+            //         App.fnUpdate()
+            //         Database.fnWriteNotesDatabase()
+            //     }
+            // }
         })
         ModeCatalogController.$oCatalogArticleEdit.on('click', () => {
             _l('$oCatalogArticleEdit')

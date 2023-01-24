@@ -29,8 +29,12 @@ export class Editor {
             var sPath = Database.fnGetArticlePathURL(Database.sArticleID)
             window.open(`https://github.com/${Database.sLogin}/${Database.sRepo}/${sPath}`)
         })
-        $(document).on("keyup keydown", function(e) {
-            if (e.ctrlKey && e.which == 83) {
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && e.key === 's') {
+                // Prevent the Save dialog to open
+                e.preventDefault();
+                // Place your code here
+                console.log('CTRL + S');
                 Editor.fnSaveEditorContents()
             }
         });

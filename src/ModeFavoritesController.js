@@ -16,7 +16,7 @@ export class ModeFavoritesController {
 
     static fnBind() 
     {
-        $(document).click((oEvent) => {
+        $(document).on('click', (oEvent) => {
             if ($(oEvent.target).parents(".favorites-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")

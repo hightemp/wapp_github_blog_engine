@@ -28,31 +28,31 @@ export class ArticlesController {
 
     static fnBind()
     {
-        ArticlesController.$oArticleEditSave.click(() => {
+        ArticlesController.$oArticleEditSave.on('click', () => {
             ArticlesController.fnSaveArticle()
             ArticlesController.oModelEditArticle.hide()
         })
 
-        ArticlesController.$oArticleMoveAllTags2to1Btn.click(() => {
+        ArticlesController.$oArticleMoveAllTags2to1Btn.on('click', () => {
             var aBox2Tags = ArticlesController.fnGetArticleBox2TagsList()
             aBox2Tags = []
             ArticlesController.fnRenderBox2List(aBox2Tags)
         })
-        ArticlesController.$oArticleMoveTags2to1Btn.click(() => {
+        ArticlesController.$oArticleMoveTags2to1Btn.on('click', () => {
             var aBox1Tags = ArticlesController.fnGetArticleBox1TagsList()
             var aAllBox2Tags = ArticlesController.fnGetArticleBox2TagsList()
             var aBox2Tags = ArticlesController.fnGetArticleBox2TagsList(true)
             aBox2Tags = aAllBox2Tags.filter((oI, iN, aA) => !~aBox2Tags.findIndex((oAI) => oAI.id == oI.id))
             ArticlesController.fnRenderBox2List(aBox2Tags)
         })
-        ArticlesController.$oArticleMoveAllTags1to2Btn.click(() => {
+        ArticlesController.$oArticleMoveAllTags1to2Btn.on('click', () => {
             var aBox1Tags = ArticlesController.fnGetArticleBox1TagsList()
             var aBox2Tags = ArticlesController.fnGetArticleBox2TagsList()
             aBox2Tags = aBox2Tags.concat(aBox1Tags)
             aBox2Tags = aBox2Tags.filter((oI, iN, aA) => iN==aA.findIndex((oAI) => oAI.id == oI.id))
             ArticlesController.fnRenderBox2List(aBox2Tags)
         })
-        ArticlesController.$oArticleMoveTags1to2Btn.click(() => {
+        ArticlesController.$oArticleMoveTags1to2Btn.on('click', () => {
             var aBox1Tags = ArticlesController.fnGetArticleBox1TagsList(true)
             var aBox2Tags = ArticlesController.fnGetArticleBox2TagsList()
             aBox2Tags = aBox2Tags.concat(aBox1Tags)

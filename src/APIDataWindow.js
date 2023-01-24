@@ -23,7 +23,7 @@ export class APIDataWindow {
 
     static fnBind(fnCB=()=>{})
     {
-        APIDataWindow.$oInfoSaveBtn.click(() => {
+        APIDataWindow.$oInfoSaveBtn.on('click', () => {
             var bEmpty = false;
             APIDataWindow.$oFormValidatorIsEmpty.each((iI, oE) => bEmpty |= oE.value.trim() == "")
             if (bEmpty) {

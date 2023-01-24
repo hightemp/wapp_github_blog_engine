@@ -34,19 +34,19 @@ export class ModeController {
     static fnBind()
     {
         console.trace("fnBind")
-        ModeController.$oModeListBtn.click(() => {
+        ModeController.$oModeListBtn.on('click', () => {
             ModeController.fnChangeMode(MODE_LIST)
         })
-        ModeController.$oModeCatalogBtn.click(() => {
+        ModeController.$oModeCatalogBtn.on('click', () => {
             ModeController.fnChangeMode(MODE_CATALOG)
         })
-        ModeController.$oModeFavoritesBtn.click(() => {
+        ModeController.$oModeFavoritesBtn.on('click', () => {
             ModeController.fnChangeMode(MODE_FAVORITES)
         })
-        ModeController.$oModeTagsBtn.click(() => {
+        ModeController.$oModeTagsBtn.on('click', () => {
             ModeController.fnChangeMode(MODE_TAGS)
         })
-        ModeController.$oModeLinksBtn.click(() => {
+        ModeController.$oModeLinksBtn.on('click', () => {
             ModeController.fnChangeMode(MODE_LINKS)
         })
     }

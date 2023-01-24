@@ -6,17 +6,17 @@ export class ExportDataController {
 
     static fnBind()
     {
-        ExportDataController.$oExportBtn.click(() => {
+        ExportDataController.$oExportBtn.on('click', () => {
             var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(Database.oDatabase));
             var dlAnchorElem = document.createElement("A");
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", `database_${(new Date).getTime()}.json`);
-            dlAnchorElem.click();
+            dlAnchorElem.on('click', );
             // document.body.appendChild(dlAnchorElem)
             // console.log(dlAnchorElem)
             dlAnchorElem.remove()
         })
-        // App.$oImportBtn.click(() => {
+        // App.$oImportBtn.on('click', () => {
             
         // })
     }

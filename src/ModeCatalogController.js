@@ -44,7 +44,7 @@ export class ModeCatalogController {
 
     static fnBind() 
     {
-        $(document).click((oEvent) => {
+        $(document).on('click', (oEvent) => {
             // App.$oCatalogArticlesPanel
             if ($(oEvent.target).parents(".articles-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
@@ -86,40 +86,40 @@ export class ModeCatalogController {
             }
         })
 
-        ModeCatalogController.$oModeCatalogGroupItems.click(() => {
+        ModeCatalogController.$oModeCatalogGroupItems.on('click', () => {
             var sID = $(this).data("id")
             ModeCatalogController.fnChangeCatalogGroup(sID)
         })
-        ModeCatalogController.$oModeCatalogCategoryItems.click(() => {
+        ModeCatalogController.$oModeCatalogCategoryItems.on('click', () => {
             var sID = $(this).data("id")
             ModeCatalogController.fnChangeCatalogCategory(sID)
         })
-        ModeCatalogController.$oModeCatalogArticleItems.click(() => {
+        ModeCatalogController.$oModeCatalogArticleItems.on('click', () => {
             var sID = $(this).data("id")
             ModeCatalogController.fnChangeArticle(sID)
         })
 
-        ModeCatalogController.$oCatalogGroupsRemove.click(() => {
+        ModeCatalogController.$oCatalogGroupsRemove.on('click', () => {
             ModeCatalogController.fnRemoveCatalogGroup(ModeCatalogController.sCatalogGroupID)
         })
-        ModeCatalogController.$oCatalogCategoryRemove.click(() => {
+        ModeCatalogController.$oCatalogCategoryRemove.on('click', () => {
             ModeCatalogController.fnRemoveCatalogCategory(ModeCatalogController.sCatalogCategoryID)
         })
-        ModeCatalogController.$oCatalogArticleRemove.click(() => {
+        ModeCatalogController.$oCatalogArticleRemove.on('click', () => {
             ModeCatalogController.fnRemoveCatalogArticle(ModeCatalogController.sArticleID)
         })
 
-        ModeCatalogController.$oCatalogGroupsReload.click(() => {
+        ModeCatalogController.$oCatalogGroupsReload.on('click', () => {
             ModeCatalogController.fnUpdateCatalogGroups()
         })
-        ModeCatalogController.$oCatalogCategoryReload.click(() => {
+        ModeCatalogController.$oCatalogCategoryReload.on('click', () => {
             ModeCatalogController.fnUpdateCatalogCategories()
         })
-        ModeCatalogController.$oCatalogArticleReload.click(() => {
+        ModeCatalogController.$oCatalogArticleReload.on('click', () => {
             ModeCatalogController.fnUpdateCatalogArticles()
         })
 
-        ModeCatalogController.$oCatalogGroupsCreate.click(() => {
+        ModeCatalogController.$oCatalogGroupsCreate.on('click', () => {
             var sName = prompt("Группа")
             if (sName) {
                 Database.fnAddRecord("groups", {
@@ -130,7 +130,7 @@ export class ModeCatalogController {
                 Database.fnWriteNotesDatabase()
             }
         })
-        ModeCatalogController.$oCatalogCategoryCreate.click(() => {
+        ModeCatalogController.$oCatalogCategoryCreate.on('click', () => {
             var sName = prompt("Категория")
             if (sName) {
                 Database.fnAddRecord("categories", {
@@ -142,10 +142,10 @@ export class ModeCatalogController {
                 Database.fnWriteNotesDatabase()
             }
         })
-        ModeCatalogController.$oCatalogArticleCreate.click(() => {
+        ModeCatalogController.$oCatalogArticleCreate.on('click', () => {
             ArticlesController.fnShowArticleEditModal(true)
         })
-        ModeCatalogController.$oCatalogGroupsEdit.click(() => {
+        ModeCatalogController.$oCatalogGroupsEdit.on('click', () => {
             var oGroup = Database.fnGetByID("groups", ModeCatalogController.sCatalogGroupID)
             if (oGroup) {
                 var sName = prompt("Группа", oGroup.name)
@@ -156,7 +156,7 @@ export class ModeCatalogController {
                 }
             }
         })
-        ModeCatalogController.$oCatalogCategoryEdit.click(() => {
+        ModeCatalogController.$oCatalogCategoryEdit.on('click', () => {
             var oCategory = Database.fnGetByID("categories", ModeCatalogController.sCatalogCategoryID)
             if (oCategory) {
                 var sName = prompt("Категория", oCategory.name)
@@ -167,7 +167,7 @@ export class ModeCatalogController {
                 }
             }
         })
-        ModeCatalogController.$oCatalogArticleEdit.click(() => {
+        ModeCatalogController.$oCatalogArticleEdit.on('click', () => {
             console.log('$oCatalogArticleEdit')
             var oArticle = Database.fnGetByID("articles", ModeCatalogController.sArticleID)
             if (oArticle) {

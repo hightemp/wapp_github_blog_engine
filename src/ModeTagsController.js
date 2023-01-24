@@ -15,7 +15,7 @@ export class ModeTagsController {
 
     static fnBind() 
     {
-        $(document).click((oEvent) => {
+        $(document).on('click', (oEvent) => {
             if ($(oEvent.target).parents(".tags-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")

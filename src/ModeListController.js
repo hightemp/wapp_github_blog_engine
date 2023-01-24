@@ -17,7 +17,7 @@ export class ModeListController {
 
     static fnBind() 
     {
-        $(document).click((oEvent) => {
+        $(document).on('click', (oEvent) => {
             if ($(oEvent.target).parents(".all-articles-panel").length) {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
@@ -28,27 +28,27 @@ export class ModeListController {
             }
         })
 
-        ModeListController.$oAllArticlesReload.click(() => {
+        ModeListController.$oAllArticlesReload.on('click', () => {
             ModeListController.fnUpdateAllArticles()
         })
-        ModeListController.$oAllArticlesReload.click(() => {
+        ModeListController.$oAllArticlesReload.on('click', () => {
             ModeListController.fnUpdateAllArticles()
         })
 
 
-        ModeListController.$oAllArticlesReload.click(() => {
+        ModeListController.$oAllArticlesReload.on('click', () => {
             ModeListController.fnUpdateAllArticles()
         })
-        ModeListController.$oAllArticlesCreate.click(() => {
+        ModeListController.$oAllArticlesCreate.on('click', () => {
             ArticlesController.fnShowArticleEditModal(true)
         })
-        ModeListController.$oAllArticlesEdit.click(() => {
+        ModeListController.$oAllArticlesEdit.on('click', () => {
             var oArticle = Database.fnGetByID("articles", ModeCatalogController.sArticleID)
             if (oArticle) {
                 ArticlesController.fnShowArticleEditModal(false)
             }
         })
-        ModeListController.$oAllArticlesRemove.click(() => {
+        ModeListController.$oAllArticlesRemove.on('click', () => {
             ModeCatalogController.fnRemoveCatalogArticle(ModeCatalogController.sArticleID)
         })
 

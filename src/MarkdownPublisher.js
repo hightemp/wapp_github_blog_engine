@@ -75,7 +75,7 @@ export class MarkdownPublisher {
         var sMarkdown = aMarkdown.join(`\n`)
 
         await MarkdownPublisher.fnPublishDocument(`index.md`, sMarkdown)
-        // console.log()
+        // _l()
     }
 
     static async fnGenerateMarkdownPages()

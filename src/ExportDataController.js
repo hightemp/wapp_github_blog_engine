@@ -13,7 +13,7 @@ export class ExportDataController {
             dlAnchorElem.setAttribute("download", `database_${(new Date).getTime()}.json`);
             dlAnchorElem.on('click', );
             // document.body.appendChild(dlAnchorElem)
-            // console.log(dlAnchorElem)
+            // _l(dlAnchorElem)
             dlAnchorElem.remove()
         })
         // App.$oImportBtn.on('click', () => {

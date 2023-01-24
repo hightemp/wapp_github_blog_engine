@@ -21,7 +21,7 @@ export class ModeFavoritesController {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
                 if (sID) {
-                    console.log("sArticleID", sID)
+                    _l("sArticleID", sID)
                     ModeCatalogController.fnChangeArticle(sID)
                 }
             }

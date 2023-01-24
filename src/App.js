@@ -34,7 +34,7 @@ export class App {
 
     static fnBind()
     {
-        console.log('fnBind')
+        _l('fnBind')
         APIDataWindow.fnBind()
         ModeListController.fnBind()
         ModeCatalogController.fnBind()
@@ -65,7 +65,7 @@ export class App {
 
     static fnStart()
     {
-        console.log('fnStart')
+        _l('fnStart')
         App.fnBind()
         App.fnStartApp()
     }

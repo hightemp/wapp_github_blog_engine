@@ -50,7 +50,7 @@ export class ModeCatalogController {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
                 if (sID) {
-                    console.log("sArticleID", sID)
+                    _l("sArticleID", sID)
                     ModeCatalogController.fnChangeArticle(sID)
                 }
             }
@@ -60,17 +60,17 @@ export class ModeCatalogController {
                     var oDiv = $($(oEvent.target).parents(".input-group")[0])
                     var sOpened = oDiv.data("opened")*1
                     var sID = oDiv.data("id")
-                    console.log('sOpened', sOpened)
+                    _l('sOpened', sOpened)
                     if (sID) { 
                         Database.fnUpdateRecord("categories", sID, { is_opened: !sOpened })
-                        console.log(Database.oDatabase)
+                        _l(Database.oDatabase)
                         ModeCatalogController.fnUpdateCatalogCategories()
                     }
                 } else {
                     var oDiv = $($(oEvent.target).parents(".input-group")[0])
                     var sID = oDiv.data("id")
                     if (sID) {
-                        console.log("sCategoryID", sID)
+                        _l("sCategoryID", sID)
                         ModeCatalogController.fnChangeCatalogCategory(sID)
                     }
                 }
@@ -80,7 +80,7 @@ export class ModeCatalogController {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
                 if (sID) {
-                    console.log("sGroupID", sID)
+                    _l("sGroupID", sID)
                     ModeCatalogController.fnChangeCatalogGroup(sID)
                 }
             }
@@ -168,7 +168,7 @@ export class ModeCatalogController {
             }
         })
         ModeCatalogController.$oCatalogArticleEdit.on('click', () => {
-            console.log('$oCatalogArticleEdit')
+            _l('$oCatalogArticleEdit')
             var oArticle = Database.fnGetByID("articles", ModeCatalogController.sArticleID)
             if (oArticle) {
                 ArticlesController.fnShowArticleEditModal(false)
@@ -224,7 +224,7 @@ export class ModeCatalogController {
             ModeCatalogController.$oCatalogCategoriesPanel.removeClass("hidden")
             var sHTML = ""
             aR = Database.fnFilterCategoriesByGroup(ModeCatalogController.sCatalogGroupID);
-            console.log("fnUpdateCatalogCategories", ModeCatalogController.sCatalogGroupID, aR)
+            _l("fnUpdateCatalogCategories", ModeCatalogController.sCatalogGroupID, aR)
             sHTML = Render.fnRenderTree(aR, ModeCatalogController.sCatalogCategoryID)
             ModeCatalogController.$oCatalogCategoriesList.html(sHTML)
         } else {

@@ -34,7 +34,7 @@ export class Editor {
                 // Prevent the Save dialog to open
                 e.preventDefault();
                 // Place your code here
-                console.log('CTRL + S');
+                _l('CTRL + S');
                 Editor.fnSaveEditorContents()
             }
         });
@@ -81,7 +81,7 @@ export class Editor {
     static fnSetEditorContent(sHTML)
     {
         var editor = document.getElementsByClassName('ql-editor')
-        console.log(sHTML)
+        _l(sHTML)
         editor[0].innerHTML = sHTML
         Database.bDirty = true;
     }

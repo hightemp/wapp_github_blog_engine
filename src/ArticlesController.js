@@ -178,10 +178,10 @@ export class ArticlesController {
             name: ArticlesController.$oArticleModelEditName.val(),
             category_id: ArticlesController.$oArticleModelEditCategory.val()
         }
-        console.log("!!!1", oObj, ModeCatalogController.sArticleID)
+        _l("!!!1", oObj, ModeCatalogController.sArticleID)
         Database.fnUpdateRecord("articles", ModeCatalogController.sArticleID, oObj)
         ArticlesController.fnSaveCurrentArticleTags()
-        console.log("!!!2", Database.oDatabase)
+        _l("!!!2", Database.oDatabase)
         Database.fnWriteNotesDatabase()
         App.fnUpdate()
     }

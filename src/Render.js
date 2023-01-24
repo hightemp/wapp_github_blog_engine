@@ -10,7 +10,7 @@ export class Render {
         for (var oI of aR) {
             if (!oI) continue;
             if (!iParentID) iParentID = null
-            console.log("fnRenderTree", oI.parent_id,iParentID)
+            _l("fnRenderTree", oI.parent_id,iParentID)
             if (oI.parent_id!=iParentID) {
                 continue;
             }
@@ -62,7 +62,7 @@ export class Render {
     static fnRenderList(aR, sSelID="", fnHook=()=>{})
     {
         var sHTML = ``
-        console.log("fnRenderList", sSelID)
+        _l("fnRenderList", sSelID)
 
         for (var oI of aR) {
             if (!oI) continue;

@@ -11,6 +11,27 @@ import { ErrorWindow } from "./ErrorWindow";
 
 export class Database {
     static oDatabase = {
+        "groups_last_id": "0",
+        "groups": [
+        ],
+        "categories_last_id": "0",
+        "categories": [
+        ],
+        "articles_last_id": "0",
+        "articles": [
+        ],
+        "favorites_last_id": "0",
+        "favorites": [
+        ],
+        "tags_last_id": "0",
+        "tags": [
+        ],
+        "tags_relataions_last_id": "1",
+        "tags_relations": [
+        ]
+    }
+
+    static oDefaultDatabase = {
         "groups_last_id": "3",
         "groups": [
             {"id":1, "name": "Test 1"},
@@ -85,7 +106,7 @@ export class Database {
         var aR = Database.oDatabase[sTable].filter((oI) => oI.id == sRecordID)
         if (aR.length) {
             $.extend(aR[0], oData)
-            console.log(aR[0], Database.oDatabase[sTable]);
+            _l(aR[0], Database.oDatabase[sTable]);
         }
     }
 
@@ -126,22 +147,25 @@ export class Database {
             .fnGetSHADatabase()
             .then(() => {
                 _s('Database.fnFirstLoadDatabase.then')
-                ModeController.fnChangeMode(MODE_CATALOG)
-                App.fnUpdate();
-                Database.fnUpdateNoteDatabase();
+                return Database.fnGetNotesDatabase().then(() => {
+                    ModeController.fnChangeMode(MODE_CATALOG)
+                    App.fnUpdate();
+                    Database.fnUpdateNoteDatabase();    
+                })
             })
-            .catch((sAnsw) => {
+            .catch((...aAnsw) => {
                 _s('Database.fnFirstLoadDatabase.catch')
-                
+                _l('Database.fnFirstLoadDatabase.catch', aAnsw)
 
-                if (/Not Found/.test(sAnsw)) {
+                if (/Not Found/.test(aAnsw[0])) {
                     // if (confirm('База не найдена. Создать базу в репозиториии?')) {
                     Database.bDirty = true;
                     Database.fnUpdateNoteDatabase();
+                    Database.fnWriteNotesDatabase()
                     ErrorWindow.fnShow('Внимание', 'База не найдена. И была создана новая.')
                     // }
                 } else {
-                    ErrorWindow.fnShow('Ошибка', sAnsw)
+                    ErrorWindow.fnShow('Ошибка', aAnsw[0])
                     // alert(sAnsw);
                 }
             })        
@@ -169,23 +193,24 @@ export class Database {
 
     static fnGetNotesDatabase()
     {
-        console.log([Database.sLogin, Database.sRepo, Database.DATABASE_PATH])
+        _l([Database.sLogin, Database.sRepo, Database.DATABASE_PATH])
         return Database.octokit.rest.repos.getContent({
             owner: Database.sLogin,
             repo: Database.sRepo,
             path: Database.DATABASE_PATH,
         }).then(({ data }) => {
-            console.log('fnGetNotesDatabase', data)
+            _l('fnGetNotesDatabase', data)
             Database.oDatabase = JSON.parse(decode(data.content))
             Database.SHA = data.sha
-            console.log('fnGetNotesDatabase', Database.oDatabase)
+            _l('fnGetNotesDatabase', Database.oDatabase)
         })
     }
 
     static fnWriteNotesDatabase()
     {
+        _s('Database.fnWriteNotesDatabase')
         App.fnUpdate()
-        console.log('fnWriteNotesDatabase', Database.oDatabase);
+        _l('fnWriteNotesDatabase', Database.oDatabase);
         Database.bDirty = false
         var sData = JSON.stringify(Database.oDatabase)
         return Database.octokit.rest.repos.createOrUpdateFileContents({
@@ -205,12 +230,12 @@ export class Database {
      */
     static fnUpdateNoteDatabase()
     {
-        if (Database.bDirty) {
-            Editor.fnPrepareEditorContents()
-            Database.fnWriteNotesDatabase()
-        }
-        Database.fnGetSHADatabase()
-        setTimeout(Database.fnUpdateNoteDatabase, Database.DATABASE_UPDATE_TIMEOUT);
+        // if (Database.bDirty) {
+        //     Editor.fnPrepareEditorContents()
+        //     Database.fnWriteNotesDatabase()
+        // }
+        // Database.fnGetSHADatabase()
+        // setTimeout(Database.fnUpdateNoteDatabase, Database.DATABASE_UPDATE_TIMEOUT);
     }
 
     // ===============================================================

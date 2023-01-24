@@ -20,7 +20,7 @@ export class ModeTagsController {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
                 if (sID) {
-                    console.log("sTagID", sID)
+                    _l("sTagID", sID)
                     ModeTagsController.fnChangeTag(sID)
                 }
             }
@@ -28,7 +28,7 @@ export class ModeTagsController {
                 var oDiv = $($(oEvent.target).parents(".input-group")[0])
                 var sID = oDiv.data("id")
                 if (sID) {
-                    console.log("sArticleID", sID)
+                    _l("sArticleID", sID)
                     ModeTagsController.fnChangeArticle(sID)
                 }
             }

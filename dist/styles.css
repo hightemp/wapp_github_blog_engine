@@ -183,6 +183,13 @@ a {
 .tree-spacer {
     width: 8px;
     display: inline-block;
+    overflow: hidden;
+}
+
+.tree-spacer::before {
+    content: ".....................................................";
+    overflow: hidden;
+    font-size: 8px;
 }
 
 .ql-editor {

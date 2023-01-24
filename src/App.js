@@ -12,6 +12,7 @@ import { Octokit } from "@octokit/rest";
 import { ModeController } from './ModeController'
 import { ArticlesController } from './ArticlesController'
 import * as bootstrap from 'bootstrap'
+import { CategoryEditWindow } from './CategoryEditWindow'
 
 export class App {
     static fnShowSavingToast()
@@ -45,6 +46,7 @@ export class App {
         ArticlesController.fnBind()
         ModeController.fnBind()
         Editor.fnBind()
+        CategoryEditWindow.fnBind()
     }
 
     static fnStartApp()

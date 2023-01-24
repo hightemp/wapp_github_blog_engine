@@ -9,6 +9,7 @@ import * as bootstrap from 'bootstrap'
 export class CategoryEditWindow {
     // NOTE: Окно сохранения
     static oModel = null
+    static bEmptyForm = false
 
     // ===============================================================
 
@@ -48,7 +49,7 @@ export class CategoryEditWindow {
         aList.push({id:'',name:'[НЕТ]'})
         aList = aList.concat(JSON.parse(JSON.stringify(Database.oDatabase.categories)))
         if (bEmptyForm) {
-            sHTML = Render.fnRenderOptionsList(aList)
+            sHTML = Render.fnRenderOptionsList(aList, ModeCatalogController.sCatalogCategoryID)
         } else {
             var oCategory = Database.fnGetCurrentCategory()
             sHTML = Render.fnRenderOptionsList(aList, oCategory.parent_id)
@@ -62,16 +63,13 @@ export class CategoryEditWindow {
         var aList = []
         aList.push({id:'',name:'[НЕТ]'})
         aList = aList.concat(JSON.parse(JSON.stringify(Database.oDatabase.groups)))
-        if (bEmptyForm) {
-            sHTML = Render.fnRenderOptionsList(aList)
-        } else {
-            sHTML = Render.fnRenderOptionsList(aList, ModeCatalogController.sCatalogGroupID)
-        }
+        sHTML = Render.fnRenderOptionsList(aList, ModeCatalogController.sCatalogGroupID)
         CategoryEditWindow.$oEditGroup.html(sHTML)
     }
 
     static fnUpdateModel(bEmptyForm=false)
     {
+        CategoryEditWindow.bEmptyForm = bEmptyForm
         CategoryEditWindow.fnUpdateName(bEmptyForm)
         CategoryEditWindow.fnUpdateGroupList(bEmptyForm)
         CategoryEditWindow.fnUpdateCategoriesList(bEmptyForm)
@@ -97,6 +95,7 @@ export class CategoryEditWindow {
 
     static fnSaveCategory()
     {
+        _s('CategoryEditWindow.fnSaveCategory')
         // {"id":1, "name": "Test 1", "is_opened": false, "parent_id": null, "group_id": "1"},
         var oObj = {
             name: CategoryEditWindow.$oEditName.val(),
@@ -104,7 +103,12 @@ export class CategoryEditWindow {
             group_id: CategoryEditWindow.$oEditGroup.val()
         }
         _l("!!!1", oObj)
-        Database.fnUpdateRecord("categories", ModeCatalogController.sCatalogCategoryID, oObj)
+        if (CategoryEditWindow.bEmptyForm) {
+            // Если статьи нет, то создаем ее
+            ModeCatalogController.sCatalogCategoryID = Database.fnAddRecord("categories", oObj)
+        } else {
+            Database.fnUpdateRecord("categories", ModeCatalogController.sCatalogCategoryID, oObj)
+        }
         _l("!!!2", Database.oDatabase)
         Database.fnWriteNotesDatabase()
         App.fnUpdate()

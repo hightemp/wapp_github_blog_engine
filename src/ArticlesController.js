@@ -9,6 +9,7 @@ import * as bootstrap from 'bootstrap'
 export class ArticlesController {
     // NOTE: Окно сохранения
     static oModelEditArticle = null
+    static bEmptyForm = false
 
     // ===============================================================
 
@@ -90,6 +91,7 @@ export class ArticlesController {
 
     static fnUpdateArticlesModel(bEmptyForm=false)
     {
+        ArticlesController.bEmptyForm = bEmptyForm
         ArticlesController.fnUpdateArticlesName(bEmptyForm)
         ArticlesController.fnUpdateArticlesTagsList(bEmptyForm)
         ArticlesController.fnUpdateArticlesCategoryList()
@@ -179,7 +181,12 @@ export class ArticlesController {
             category_id: ArticlesController.$oArticleModelEditCategory.val()
         }
         _l("!!!1", oObj, ModeCatalogController.sArticleID)
-        Database.fnUpdateRecord("articles", ModeCatalogController.sArticleID, oObj)
+        if (ModeCatalogController.bEmptyForm) {
+            // Если статьи нет, то создаем ее
+            ModeCatalogController.sArticleID = Database.fnAddRecord("articles", oObj)
+        } else {
+            Database.fnUpdateRecord("articles", ModeCatalogController.sArticleID, oObj)
+        }
         ArticlesController.fnSaveCurrentArticleTags()
         _l("!!!2", Database.oDatabase)
         Database.fnWriteNotesDatabase()

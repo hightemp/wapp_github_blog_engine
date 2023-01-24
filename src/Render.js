@@ -9,9 +9,8 @@ export class Render {
 
         for (var oI of aR) {
             if (!oI) continue;
-            if (!iParentID) iParentID = null
-            _l("fnRenderTree", oI.parent_id,iParentID)
-            if (oI.parent_id!=iParentID) {
+            _l("fnRenderTree", [oI.parent_id, iParentID, !oI.parent_id && !!iParentID])
+            if (!oI.parent_id && !!iParentID) {
                 continue;
             }
             var sItemStatus = ``

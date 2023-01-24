@@ -29,7 +29,7 @@ export class Editor {
             var sPath = Database.fnGetArticlePathURL(Database.sArticleID)
             window.open(`https://github.com/${Database.sLogin}/${Database.sRepo}/${sPath}`)
         })
-        $(document).on( "keydown", (event) => {
+        $(document).on("keyup keydown", function(e) {
             if (e.ctrlKey && e.which == 83) {
                 Editor.fnSaveEditorContents()
             }
